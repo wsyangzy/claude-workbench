@@ -361,7 +361,6 @@ export interface ProviderConfig {
 export interface CurrentProviderConfig {
   anthropic_base_url?: string;
   anthropic_auth_token?: string;
-  anthropic_api_key?: string;
   anthropic_model?: string;
 }
 

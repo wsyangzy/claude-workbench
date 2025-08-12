@@ -450,14 +450,6 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
                     </div>
                   </div>
                 )}
-                {currentConfig.anthropic_api_key && (
-                  <div>
-                    <p className="font-medium text-sm">ANTHROPIC_API_KEY</p>
-                    <div className="text-sm text-muted-foreground font-mono bg-muted p-3 rounded break-all overflow-hidden w-full">
-                      {showTokens ? currentConfig.anthropic_api_key : maskToken(currentConfig.anthropic_api_key)}
-                    </div>
-                  </div>
-                )}
                 {currentConfig.anthropic_model && (
                   <div>
                     <p className="font-medium text-sm">ANTHROPIC_MODEL</p>

@@ -20,7 +20,6 @@ pub struct ProviderConfig {
 pub struct CurrentConfig {
     pub anthropic_base_url: Option<String>,
     pub anthropic_auth_token: Option<String>,
-    pub anthropic_api_key: Option<String>,
     pub anthropic_model: Option<String>,
 }
 
@@ -186,7 +185,6 @@ pub fn get_current_provider_config() -> Result<CurrentConfig, String> {
     Ok(CurrentConfig {
         anthropic_base_url: settings.env.get("ANTHROPIC_BASE_URL").cloned(),
         anthropic_auth_token: settings.env.get("ANTHROPIC_AUTH_TOKEN").cloned(),
-        anthropic_api_key: settings.env.get("ANTHROPIC_API_KEY").cloned(),
         anthropic_model: settings.env.get("ANTHROPIC_MODEL").cloned(),
     })
 }
@@ -309,7 +307,9 @@ fn save_claude_settings(settings: &ClaudeSettings) -> Result<(), String> {
         
         // 如果有 permissions 配置也更新
         if let Some(permissions) = &settings.permissions {
-            obj.insert("permissions".to_string(), serde_json::to_value(permissions).unwrap());
+            if let Ok(permissions_value) = serde_json::to_value(permissions) {
+                obj.insert("permissions".to_string(), permissions_value);
+            }
         }
     }
     
@@ -417,8 +417,7 @@ fn detect_current_provider(configs: &[ProviderConfig]) -> Option<String> {
     
     // 如果没有匹配到预设配置，返回 "custom"
     if current_config.anthropic_base_url.is_some() || 
-       current_config.anthropic_auth_token.is_some() ||
-       current_config.anthropic_api_key.is_some() {
+       current_config.anthropic_auth_token.is_some() {
         Some("custom".to_string())
     } else {
         None
