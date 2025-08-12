@@ -28,6 +28,7 @@ interface ProviderManagerProps {
 export default function ProviderManager({ onBack }: ProviderManagerProps) {
   const [presets, setPresets] = useState<ProviderConfig[]>([]);
   const [currentConfig, setCurrentConfig] = useState<CurrentProviderConfig | null>(null);
+  const [currentProviderId, setCurrentProviderId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [switching, setSwitching] = useState<string | null>(null);
   const [testing, setTesting] = useState<string | null>(null);
@@ -45,12 +46,14 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [presetsData, configData] = await Promise.all([
+      const [presetsData, configData, providerIdData] = await Promise.all([
         api.getProviderPresets(),
-        api.getCurrentProviderConfig()
+        api.getCurrentProviderConfig(),
+        api.getCurrentProviderId()
       ]);
       setPresets(presetsData);
       setCurrentConfig(configData);
+      setCurrentProviderId(providerIdData);
     } catch (error) {
       console.error('Failed to load provider data:', error);
       setToastMessage({ message: '加载代理商配置失败', type: 'error' });
@@ -84,6 +87,18 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
       setToastMessage({ message: '清理配置失败', type: 'error' });
     } finally {
       setSwitching(null);
+    }
+  };
+
+  const debugSettings = async () => {
+    try {
+      const debugInfo = await api.debugSettingsPath();
+      console.log('=== 配置文件调试信息 ===');
+      console.log(debugInfo);
+      setToastMessage({ message: '调试信息已输出到控制台，请检查开发者工具', type: 'success' });
+    } catch (error) {
+      console.error('Debug settings failed:', error);
+      setToastMessage({ message: '调试失败: ' + String(error), type: 'error' });
     }
   };
 
@@ -152,15 +167,22 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
   };
 
   const isCurrentProvider = (config: ProviderConfig): boolean => {
-    if (!currentConfig) return false;
-    return currentConfig.anthropic_base_url === config.base_url;
+    return currentProviderId === config.id;
   };
 
   const maskToken = (token: string): string => {
     if (!token || token.length <= 10) return token;
-    const start = token.substring(0, 8);
-    const end = token.substring(token.length - 4);
-    return `${start}${'*'.repeat(token.length - 12)}${end}`;
+    // 对于非常长的token，显示更多开头和结尾的字符，并限制中间部分的长度
+    if (token.length > 100) {
+      const start = token.substring(0, 12);
+      const end = token.substring(token.length - 8);
+      const maskLength = Math.min(20, token.length - 20);
+      return `${start}${'*'.repeat(maskLength)}${end}`;
+    } else {
+      const start = token.substring(0, 8);
+      const end = token.substring(token.length - 4);
+      return `${start}${'*'.repeat(token.length - 12)}${end}`;
+    }
   };
 
   if (loading) {
@@ -210,6 +232,15 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
             查看当前配置
           </Button>
           <Button
+            variant="outline"
+            size="sm"
+            onClick={debugSettings}
+            className="text-xs"
+          >
+            <AlertCircle className="h-3 w-3 mr-1" />
+            调试配置
+          </Button>
+          <Button
             variant="destructive"
             size="sm"
             onClick={clearProvider}
@@ -242,9 +273,10 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
             </div>
           ) : (
             presets.map((config) => (
-            <Card key={config.id} className={`p-4 ${isCurrentProvider(config) ? 'ring-2 ring-primary' : ''}`}>
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
+            <Card key={config.id} className={`p-4 overflow-hidden ${isCurrentProvider(config) ? 'ring-2 ring-primary' : ''}`}>
+              {/* 上半部分：基本信息和按钮 */}
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1 min-w-0">{/* min-w-0 用于确保flex-shrink正常工作 */}
                   <div className="flex items-center gap-3 mb-2">
                     <div className="flex items-center gap-2">
                       <Globe className="h-4 w-4 text-muted-foreground" />
@@ -261,23 +293,13 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
                   <div className="space-y-1 text-sm text-muted-foreground">
                     <p><span className="font-medium">描述：</span>{config.description}</p>
                     <p><span className="font-medium">API地址：</span>{config.base_url}</p>
-                    {config.auth_token && (
-                      <p><span className="font-medium">认证Token：</span>
-                        {showTokens ? config.auth_token : maskToken(config.auth_token)}
-                      </p>
-                    )}
-                    {config.api_key && (
-                      <p><span className="font-medium">API Key：</span>
-                        {showTokens ? config.api_key : maskToken(config.api_key)}
-                      </p>
-                    )}
                     {config.model && (
                       <p><span className="font-medium">模型：</span>{config.model}</p>
                     )}
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-shrink-0">{/* flex-shrink-0 防止按钮被压缩 */}
                   <Button
                     variant="outline"
                     size="sm"
@@ -330,8 +352,56 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
                   </Button>
                 </div>
               </div>
+              
+              {/* 下半部分：跨越全宽的Token显示 */}
+              {config.auth_token && (
+                <div className="mt-3 pt-3 border-t border-border/50">
+                  <div className="font-medium text-sm text-muted-foreground mb-2">认证Token：</div>
+                  <div className="text-sm text-muted-foreground font-mono bg-muted p-3 rounded break-all overflow-hidden">
+                    {showTokens ? config.auth_token : maskToken(config.auth_token)}
+                  </div>
+                </div>
+              )}
             </Card>
             ))
+          )}
+
+          {/* Current Status Display */}
+          {presets.length > 0 && (
+            <div className="mt-6 p-4 bg-muted/30 rounded-lg border">
+              <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
+                <Settings2 className="h-4 w-4" />
+                当前配置状态
+              </h3>
+              <div className="space-y-2 text-sm">
+                {currentProviderId ? (
+                  currentProviderId === "custom" ? (
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="h-4 w-4 text-orange-500" />
+                      <span className="text-orange-700">自定义配置 (未在预设列表中)</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-green-500" />
+                      <span className="text-green-700">
+                        正在使用: {presets.find(p => p.id === currentProviderId)?.name || currentProviderId}
+                      </span>
+                    </div>
+                  )
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4 text-gray-500" />
+                    <span className="text-gray-600">未配置任何代理商</span>
+                  </div>
+                )}
+                
+                {currentConfig?.anthropic_base_url && (
+                  <p className="text-muted-foreground">
+                    API地址: {currentConfig.anthropic_base_url}
+                  </p>
+                )}
+              </div>
+            </div>
           )}
 
           {/* Toggle tokens visibility */}
@@ -357,11 +427,11 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
 
       {/* Current Config Dialog */}
       <Dialog open={showCurrentConfig} onOpenChange={setShowCurrentConfig}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>当前环境变量配置</DialogTitle>
+            <DialogTitle>当前 settings.json 配置</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="space-y-4 overflow-x-hidden">{/* 确保水平方向不溢出 */}
             {currentConfig ? (
               <div className="space-y-3">
                 {currentConfig.anthropic_base_url && (
@@ -375,17 +445,17 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
                 {currentConfig.anthropic_auth_token && (
                   <div>
                     <p className="font-medium text-sm">ANTHROPIC_AUTH_TOKEN</p>
-                    <p className="text-sm text-muted-foreground font-mono bg-muted p-2 rounded">
+                    <div className="text-sm text-muted-foreground font-mono bg-muted p-3 rounded break-all overflow-hidden w-full">
                       {showTokens ? currentConfig.anthropic_auth_token : maskToken(currentConfig.anthropic_auth_token)}
-                    </p>
+                    </div>
                   </div>
                 )}
                 {currentConfig.anthropic_api_key && (
                   <div>
                     <p className="font-medium text-sm">ANTHROPIC_API_KEY</p>
-                    <p className="text-sm text-muted-foreground font-mono bg-muted p-2 rounded">
+                    <div className="text-sm text-muted-foreground font-mono bg-muted p-3 rounded break-all overflow-hidden w-full">
                       {showTokens ? currentConfig.anthropic_api_key : maskToken(currentConfig.anthropic_api_key)}
-                    </p>
+                    </div>
                   </div>
                 )}
                 {currentConfig.anthropic_model && (
@@ -418,7 +488,7 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
               <div className="flex items-center justify-center py-8">
                 <div className="text-center">
                   <AlertCircle className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground">未检测到任何 ANTHROPIC 环境变量</p>
+                  <p className="text-sm text-muted-foreground">未检测到任何 ANTHROPIC 配置</p>
                 </div>
               </div>
             )}

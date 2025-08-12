@@ -351,9 +351,8 @@ export interface ProviderConfig {
   name: string;
   description: string;
   base_url: string;
-  auth_token?: string;
-  api_key?: string;
-  model?: string;
+  auth_token?: string;  // 对应 ANTHROPIC_AUTH_TOKEN
+  model?: string;       // 对应 ANTHROPIC_MODEL
 }
 
 /**
@@ -2019,7 +2018,7 @@ export const api = {
   },
 
   /**
-   * Gets the current provider configuration from environment variables
+   * Gets the current provider configuration from settings.json file
    * @returns Promise resolving to current configuration
    */
   async getCurrentProviderConfig(): Promise<CurrentProviderConfig> {
@@ -2027,6 +2026,32 @@ export const api = {
       return await invoke<CurrentProviderConfig>("get_current_provider_config");
     } catch (error) {
       console.error("Failed to get current provider config:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Gets the ID of the currently active provider configuration
+   * @returns Promise resolving to current provider ID or null if none active
+   */
+  async getCurrentProviderId(): Promise<string | null> {
+    try {
+      return await invoke<string | null>("get_current_provider_id");
+    } catch (error) {
+      console.error("Failed to get current provider ID:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Debug settings file path and configuration loading
+   * @returns Promise resolving to debug information about settings file
+   */
+  async debugSettingsPath(): Promise<string> {
+    try {
+      return await invoke<string>("debug_settings_path");
+    } catch (error) {
+      console.error("Failed to debug settings path:", error);
       throw error;
     }
   },

@@ -1,0 +1,12 @@
+{
+  "env": {
+    "ANTHROPIC_AUTH_TOKEN": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyMjIxLCJlbWFpbCI6Inlhbmd6aGVuZ3l1X3l6eUBxcS5jb20iLCJzdWIiOiIyMjIxIiwiaWF0IjoxNzU0Mjk1NTQ4fQ.4u8IT5r1YN9y2IC9p-PuhJF5LK0uv_unWY_sRkKHCHc",
+    "ANTHROPIC_BASE_URL": "https://api.duckcode.top/api/claude",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": 1,
+    "API_TIMEOUT_MS": 600000
+  },
+  "permissions": {
+    "allow": [],
+    "deny": []
+  }
+}

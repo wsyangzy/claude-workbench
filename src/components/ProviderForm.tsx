@@ -29,7 +29,6 @@ export default function ProviderForm({
     description: initialData?.description || '',
     base_url: initialData?.base_url || '',
     auth_token: initialData?.auth_token || '',
-    api_key: initialData?.api_key || '',
     model: initialData?.model || '',
   });
   
@@ -56,8 +55,8 @@ export default function ProviderForm({
     if (!formData.base_url.startsWith('http://') && !formData.base_url.startsWith('https://')) {
       return 'API地址必须以 http:// 或 https:// 开头';
     }
-    if (!formData.auth_token?.trim() && !formData.api_key?.trim()) {
-      return '请至少填写认证Token或API Key中的一个';
+    if (!formData.auth_token?.trim()) {
+      return '请填写认证Token';
     }
     return null;
   };
@@ -78,7 +77,6 @@ export default function ProviderForm({
         ...formData,
         // 清理空值
         auth_token: formData.auth_token?.trim() || undefined,
-        api_key: formData.api_key?.trim() || undefined,
         model: formData.model?.trim() || undefined,
       };
 
@@ -155,7 +153,7 @@ export default function ProviderForm({
                 <Eye className="h-4 w-4" />
                 认证信息
                 <span className="text-xs text-muted-foreground ml-2">
-                  (至少填写一个)
+                  (必填)
                 </span>
               </h3>
               
@@ -170,39 +168,14 @@ export default function ProviderForm({
                       onChange={(e) => handleInputChange('auth_token', e.target.value)}
                       placeholder="sk-ant-..."
                       disabled={loading}
+                      className="pr-12 [&::-webkit-credentials-auto-fill-button]:!hidden [&::-ms-reveal]:!hidden" // 为按钮预留空间并隐藏浏览器默认按钮
+                      autoComplete="new-password" // 防止浏览器干预
                     />
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="absolute right-1 top-1 h-8 w-8 p-0"
-                      onClick={() => setShowTokens(!showTokens)}
-                    >
-                      {showTokens ? (
-                        <EyeOff className="h-3 w-3" />
-                      ) : (
-                        <Eye className="h-3 w-3" />
-                      )}
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="api_key">API Key</Label>
-                  <div className="relative">
-                    <Input
-                      id="api_key"
-                      type={showTokens ? "text" : "password"}
-                      value={formData.api_key || ''}
-                      onChange={(e) => handleInputChange('api_key', e.target.value)}
-                      placeholder="sk-..."
-                      disabled={loading}
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-1 top-1 h-8 w-8 p-0"
+                      className="absolute right-1 top-1 h-8 w-10 p-0 bg-transparent hover:bg-muted/20" // 使用透明背景，悬停时显示浅色
                       onClick={() => setShowTokens(!showTokens)}
                     >
                       {showTokens ? (
