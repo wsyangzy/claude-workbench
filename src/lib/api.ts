@@ -2043,19 +2043,6 @@ export const api = {
   },
 
   /**
-   * Debug settings file path and configuration loading
-   * @returns Promise resolving to debug information about settings file
-   */
-  async debugSettingsPath(): Promise<string> {
-    try {
-      return await invoke<string>("debug_settings_path");
-    } catch (error) {
-      console.error("Failed to debug settings path:", error);
-      throw error;
-    }
-  },
-
-  /**
    * Switches to a new provider configuration
    * @param config - The provider configuration to switch to
    * @returns Promise resolving to success message

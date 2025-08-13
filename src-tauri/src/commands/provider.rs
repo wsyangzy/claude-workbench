@@ -336,7 +336,6 @@ fn save_claude_settings(settings: &ClaudeSettings) -> Result<(), String> {
     fs::write(&settings_path, content)
         .map_err(|e| format!("写入 settings.json 失败: {}", e))?;
     
-    info!("成功保存配置到: {:?}", settings_path);
     Ok(())
 }
 
@@ -344,10 +343,6 @@ fn save_claude_settings(settings: &ClaudeSettings) -> Result<(), String> {
 pub async fn switch_provider_config(app: tauri::AppHandle, config: ProviderConfig) -> Result<String, String> {
     // 加载当前设置
     let mut settings = load_claude_settings()?;
-    
-    // 调试日志
-    info!("切换代理商配置: {:?}", config);
-    info!("Model字段值: {:?}", config.model);
     
     // 清除所有ANTHROPIC相关的配置，然后重新设置
     settings.env.remove("ANTHROPIC_MODEL");
@@ -357,21 +352,14 @@ pub async fn switch_provider_config(app: tauri::AppHandle, config: ProviderConfi
     settings.env.insert("ANTHROPIC_BASE_URL".to_string(), config.base_url.clone());
     
     if let Some(auth_token) = &config.auth_token {
-        info!("设置 ANTHROPIC_AUTH_TOKEN");
         settings.env.insert("ANTHROPIC_AUTH_TOKEN".to_string(), auth_token.clone());
-    } else {
-        info!("保持 ANTHROPIC_AUTH_TOKEN 清除状态");
     }
     
     if let Some(model) = &config.model {
-        info!("设置 ANTHROPIC_MODEL 为: {}", model);
         settings.env.insert("ANTHROPIC_MODEL".to_string(), model.clone());
-    } else {
-        info!("保持 ANTHROPIC_MODEL 清除状态");
     }
     
     // 保存设置
-    info!("保存前的env内容: {:?}", settings.env);
     save_claude_settings(&settings)?;
     
     // 终止所有运行中的Claude进程以使新配置生效
@@ -524,42 +512,4 @@ async fn terminate_claude_processes(app: &AppHandle) {
     }
     
     info!("Claude进程终止操作完成");
-}
-
-// 调试命令：检查配置文件读取
-#[command]
-pub fn debug_settings_path() -> Result<String, String> {
-    let settings_path = get_claude_settings_path()?;
-    let exists = settings_path.exists();
-    
-    let mut result = format!("配置文件路径: {:?}\n文件存在: {}\n", settings_path, exists);
-    
-    if exists {
-        match fs::read_to_string(&settings_path) {
-            Ok(content) => {
-                result.push_str(&format!("文件内容长度: {} 字符\n", content.len()));
-                result.push_str(&format!("文件内容预览: {}\n", &content[..content.len().min(200)]));
-            }
-            Err(e) => {
-                result.push_str(&format!("读取文件失败: {}\n", e));
-            }
-        }
-    }
-    
-    // 尝试加载配置
-    match load_claude_settings() {
-        Ok(settings) => {
-            result.push_str(&format!("配置加载成功，env 项目数: {}\n", settings.env.len()));
-            for (key, value) in &settings.env {
-                if key.starts_with("ANTHROPIC") {
-                    result.push_str(&format!("  {}: {}\n", key, if value.len() > 20 { &value[..20] } else { value }));
-                }
-            }
-        }
-        Err(e) => {
-            result.push_str(&format!("配置加载失败: {}\n", e));
-        }
-    }
-    
-    Ok(result)
 }

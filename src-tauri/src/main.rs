@@ -51,7 +51,7 @@ use commands::clipboard::{
 use commands::provider::{
     get_provider_presets, get_current_provider_config, get_current_provider_id, switch_provider_config,
     clear_provider_config, test_provider_connection, add_provider_config,
-    update_provider_config, delete_provider_config, get_provider_config, debug_settings_path,
+    update_provider_config, delete_provider_config, get_provider_config,
 };
 use process::ProcessRegistryState;
 use std::sync::Mutex;
@@ -234,7 +234,6 @@ fn main() {
             update_provider_config,
             delete_provider_config,
             get_provider_config,
-            debug_settings_path,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

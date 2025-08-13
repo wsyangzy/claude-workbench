@@ -90,18 +90,6 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
     }
   };
 
-  const debugSettings = async () => {
-    try {
-      const debugInfo = await api.debugSettingsPath();
-      console.log('=== 配置文件调试信息 ===');
-      console.log(debugInfo);
-      setToastMessage({ message: '调试信息已输出到控制台，请检查开发者工具', type: 'success' });
-    } catch (error) {
-      console.error('Debug settings failed:', error);
-      setToastMessage({ message: '调试失败: ' + String(error), type: 'error' });
-    }
-  };
-
   const testConnection = async (config: ProviderConfig) => {
     try {
       setTesting(config.id);
@@ -230,15 +218,6 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
           >
             <Eye className="h-3 w-3 mr-1" />
             查看当前配置
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={debugSettings}
-            className="text-xs"
-          >
-            <AlertCircle className="h-3 w-3 mr-1" />
-            调试配置
           </Button>
           <Button
             variant="destructive"
