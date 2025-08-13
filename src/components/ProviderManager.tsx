@@ -279,7 +279,7 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
                 <div className="flex-1 min-w-0">{/* min-w-0 用于确保flex-shrink正常工作 */}
                   <div className="flex items-center gap-3 mb-2">
                     <div className="flex items-center gap-2">
-                      <Globe className="h-4 w-4 text-muted-foreground" />
+                      <Globe className="h-4 w-4 text-muted-foregrounuud" />
                       <h3 className="font-medium">{config.name}</h3>
                     </div>
                     {isCurrentProvider(config) && (

@@ -12,8 +12,19 @@ pub struct ProviderConfig {
     pub name: String,
     pub description: String,
     pub base_url: String,
+    #[serde(default, deserialize_with = "deserialize_optional_string")]
     pub auth_token: Option<String>,  // 对应 ANTHROPIC_AUTH_TOKEN
+    #[serde(default, deserialize_with = "deserialize_optional_string")]
     pub model: Option<String>,       // 对应 ANTHROPIC_MODEL
+}
+
+// 自定义反序列化函数，将空字符串转换为None
+fn deserialize_optional_string<'de, D>(deserializer: D) -> Result<Option<String>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let value: Option<String> = Option::deserialize(deserializer)?;
+    Ok(value.and_then(|s| if s.trim().is_empty() { None } else { Some(s) }))
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -289,7 +300,7 @@ fn save_claude_settings(settings: &ClaudeSettings) -> Result<(), String> {
         serde_json::json!({})
     };
     
-    // 更新 env 字段 - 保留现有的其他环境变量
+    // 更新 env 字段 - 保留现有的其他环境变量，但完全替换ANTHROPIC相关配置
     if let Some(obj) = full_settings.as_object_mut() {
         // 获取现有的 env 对象，如果不存在则创建新的
         let existing_env = obj.get("env")
@@ -297,8 +308,14 @@ fn save_claude_settings(settings: &ClaudeSettings) -> Result<(), String> {
             .cloned()
             .unwrap_or_default();
         
-        // 合并环境变量：保留现有的，更新我们管理的部分
+        // 从现有环境变量开始，但移除所有ANTHROPIC相关的配置
         let mut merged_env = existing_env;
+        merged_env.remove("ANTHROPIC_BASE_URL");
+        merged_env.remove("ANTHROPIC_AUTH_TOKEN");
+        merged_env.remove("ANTHROPIC_MODEL");
+        merged_env.remove("ANTHROPIC_API_KEY"); // 清理旧的API_KEY字段
+        
+        // 然后添加新的环境变量
         for (key, value) in &settings.env {
             merged_env.insert(key.clone(), serde_json::Value::String(value.clone()));
         }
@@ -328,26 +345,33 @@ pub async fn switch_provider_config(app: tauri::AppHandle, config: ProviderConfi
     // 加载当前设置
     let mut settings = load_claude_settings()?;
     
+    // 调试日志
+    info!("切换代理商配置: {:?}", config);
+    info!("Model字段值: {:?}", config.model);
+    
+    // 清除所有ANTHROPIC相关的配置，然后重新设置
+    settings.env.remove("ANTHROPIC_MODEL");
+    settings.env.remove("ANTHROPIC_AUTH_TOKEN");
+    
     // 更新 ANTHROPIC 相关配置，保留其他配置（如 CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC, API_TIMEOUT_MS 等）
     settings.env.insert("ANTHROPIC_BASE_URL".to_string(), config.base_url.clone());
     
     if let Some(auth_token) = &config.auth_token {
-        if !auth_token.trim().is_empty() {
-            settings.env.insert("ANTHROPIC_AUTH_TOKEN".to_string(), auth_token.clone());
-        }
+        info!("设置 ANTHROPIC_AUTH_TOKEN");
+        settings.env.insert("ANTHROPIC_AUTH_TOKEN".to_string(), auth_token.clone());
     } else {
-        settings.env.remove("ANTHROPIC_AUTH_TOKEN");
+        info!("保持 ANTHROPIC_AUTH_TOKEN 清除状态");
     }
     
     if let Some(model) = &config.model {
-        if !model.trim().is_empty() {
-            settings.env.insert("ANTHROPIC_MODEL".to_string(), model.clone());
-        }
+        info!("设置 ANTHROPIC_MODEL 为: {}", model);
+        settings.env.insert("ANTHROPIC_MODEL".to_string(), model.clone());
     } else {
-        settings.env.remove("ANTHROPIC_MODEL");
+        info!("保持 ANTHROPIC_MODEL 清除状态");
     }
     
     // 保存设置
+    info!("保存前的env内容: {:?}", settings.env);
     save_claude_settings(&settings)?;
     
     // 终止所有运行中的Claude进程以使新配置生效
