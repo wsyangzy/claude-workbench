@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -25,6 +26,100 @@ interface UsageDashboardProps {
   onBack: () => void;
 }
 
+interface TooltipData {
+  date: string;
+  total_cost: number;
+  total_tokens: number;
+  models_used: string[];
+}
+
+interface TooltipPortalProps {
+  data: TooltipData | null;
+  position: { x: number; y: number };
+  formatCurrency: (amount: number) => string;
+  formatTokens: (num: number) => string;
+}
+
+// Memoized Portal Tooltip Component - renders outside main component tree
+const TooltipPortal = React.memo<TooltipPortalProps>(({ data, position, formatCurrency, formatTokens }) => {
+  if (!data) return null;
+
+  const date = new Date(data.date.replace(/-/g, '/'));
+  const formattedDate = date.toLocaleDateString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric'
+  });
+
+  // Use more accurate tooltip dimensions based on content
+  const TOOLTIP_WIDTH = 160; // Reduced width for better visual appearance
+  const TOOLTIP_HEIGHT = 120;
+  const OFFSET = 10;
+  
+  let x, y;
+  
+  // Precise horizontal positioning with consistent distance
+  const spaceOnRight = window.innerWidth - position.x;
+  const spaceOnLeft = position.x;
+  
+  if (spaceOnRight >= TOOLTIP_WIDTH + OFFSET + 20) {
+    // Enough space on right
+    x = position.x + OFFSET;
+  } else if (spaceOnLeft >= TOOLTIP_WIDTH + OFFSET + 20) {
+    // Not enough space on right, use left
+    x = position.x - OFFSET - TOOLTIP_WIDTH;
+  } else {
+    // Extreme case - center tooltip
+    x = (window.innerWidth - TOOLTIP_WIDTH) / 2;
+  }
+  
+  // Vertical positioning with consistent distance
+  const spaceAbove = position.y;
+  const spaceBelow = window.innerHeight - position.y;
+  
+  if (spaceAbove >= TOOLTIP_HEIGHT + OFFSET + 20) {
+    // Enough space above
+    y = position.y - OFFSET - TOOLTIP_HEIGHT;
+  } else if (spaceBelow >= TOOLTIP_HEIGHT + OFFSET + 20) {
+    // Not enough space above, use below
+    y = position.y + OFFSET;
+  } else {
+    // Extreme case - center tooltip vertically
+    y = (window.innerHeight - TOOLTIP_HEIGHT) / 2;
+  }
+  
+  // Final boundary protection
+  x = Math.max(5, Math.min(x, window.innerWidth - TOOLTIP_WIDTH - 5));
+  y = Math.max(5, Math.min(y, window.innerHeight - TOOLTIP_HEIGHT - 5));
+
+  return createPortal(
+    <div
+      className="fixed pointer-events-none z-[9999]"
+      style={{
+        left: `${x}px`,
+        top: `${y}px`,
+        transform: 'translateZ(0)' // Force GPU layer to avoid reflows
+      }}
+    >
+      <div className="bg-background border border-border rounded-lg shadow-lg p-3 whitespace-nowrap">
+        <p className="text-sm font-semibold">{formattedDate}</p>
+        <p className="text-sm text-muted-foreground mt-1">
+          成本： {formatCurrency(data.total_cost)}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          {formatTokens(data.total_tokens)} 个令牌
+        </p>
+        <p className="text-xs text-muted-foreground">
+          {data.models_used.length} 个模型
+        </p>
+      </div>
+    </div>,
+    document.body // Render directly to body, outside component tree
+  );
+});
+
+TooltipPortal.displayName = "TooltipPortal";
+
 /**
  * UsageDashboard component - Displays Claude API usage statistics and costs
  * 
@@ -39,7 +134,11 @@ export const UsageDashboard: React.FC<UsageDashboardProps> = ({ onBack }) => {
   const [selectedDateRange, setSelectedDateRange] = useState<"all" | "7d" | "30d" | "today">("all");
   const [activeTab, setActiveTab] = useState("overview");
   const [apiBaseUrlStats, setApiBaseUrlStats] = useState<ApiBaseUrlUsage[] | null>(null);
-
+  
+  // Optimized tooltip state
+  const [tooltipData, setTooltipData] = useState<TooltipData | null>(null);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  
   useEffect(() => {
     loadUsageStats();
   }, [selectedDateRange]);
@@ -97,29 +196,49 @@ export const UsageDashboard: React.FC<UsageDashboardProps> = ({ onBack }) => {
     }
   };
 
-  const formatCurrency = (amount: number): string => {
+  // Memoized formatting functions to prevent recreation
+  const formatCurrency = useCallback((amount: number): string => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 2,
       maximumFractionDigits: 4
     }).format(amount);
-  };
+  }, []);
 
-  const formatNumber = (num: number): string => {
+  const formatNumber = useCallback((num: number): string => {
     return new Intl.NumberFormat('en-US').format(num);
-  };
+  }, []);
 
-  const formatTokens = (num: number): string => {
+  const formatTokens = useCallback((num: number): string => {
     if (num >= 1_000_000) {
       return `${(num / 1_000_000).toFixed(2)}M`;
     } else if (num >= 1_000) {
       return `${(num / 1_000).toFixed(1)}K`;
     }
     return formatNumber(num);
-  };
+  }, [formatNumber]);
 
-  const getModelDisplayName = (model: string): string => {
+  // Optimized mouse handlers that avoid DOM measurements
+  const handleMouseEnter = useCallback((day: any, e: React.MouseEvent) => {
+    setTooltipData({
+      date: day.date,
+      total_cost: day.total_cost,
+      total_tokens: day.total_tokens,
+      models_used: day.models_used
+    });
+    setTooltipPosition({ x: e.clientX, y: e.clientY });
+  }, []);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    setTooltipPosition({ x: e.clientX, y: e.clientY });
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    setTooltipData(null);
+  }, []);
+
+  const getModelDisplayName = useCallback((model: string): string => {
     const modelMap: Record<string, string> = {
       "claude-4-opus": "Opus 4",
       "claude-4-sonnet": "Sonnet 4",
@@ -127,13 +246,27 @@ export const UsageDashboard: React.FC<UsageDashboardProps> = ({ onBack }) => {
       "claude-3-opus": "Opus 3",
     };
     return modelMap[model] || model;
-  };
+  }, []);
 
-  const getModelColor = (model: string): string => {
+  const getModelColor = useCallback((model: string): string => {
     if (model.includes("opus")) return "text-purple-500";
     if (model.includes("sonnet")) return "text-blue-500";
     return "text-gray-500";
-  };
+  }, []);
+
+  // Memoized chart data to prevent recalculation
+  const chartData = useMemo(() => {
+    if (!stats?.by_date) return null;
+    
+    const maxCost = Math.max(...stats.by_date.map(d => d.total_cost), 0);
+    const halfMaxCost = maxCost / 2;
+    
+    return {
+      maxCost,
+      halfMaxCost,
+      dateData: stats.by_date.slice().reverse()
+    };
+  }, [stats?.by_date]);
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
@@ -432,11 +565,11 @@ export const UsageDashboard: React.FC<UsageDashboardProps> = ({ onBack }) => {
                       <h3 className="text-sm font-semibold mb-4">按会话使用情况</h3>
                       <div className="space-y-3">
                           {sessionStats?.map((session) => (
-                              <div key={`${session.project_path}-${session.project_name}`} className="flex items-center justify-between py-2 border-b border-border last:border-0">
-                                  <div className="flex flex-col">
-                                      <div className="flex items-center space-x-2">
-                                        <Briefcase className="h-4 w-4 text-muted-foreground" />
-                                        <span className="text-xs font-mono text-muted-foreground truncate max-w-[200px]" title={session.project_path}>
+                              <div key={`${session.project_path}-${session.project_name}`} className="flex items-center justify-between py-2 border-b border-border last:border-0 gap-4">
+                                  <div className="flex flex-col min-w-0 flex-1">
+                                      <div className="flex items-center space-x-2 min-w-0">
+                                        <Briefcase className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                        <span className="text-xs font-mono text-muted-foreground truncate" title={session.project_path}>
                                             {session.project_path.split('/').slice(-2).join('/')}
                                         </span>
                                       </div>
@@ -444,7 +577,7 @@ export const UsageDashboard: React.FC<UsageDashboardProps> = ({ onBack }) => {
                                           {session.project_name}
                                       </span>
                                   </div>
-                                  <div className="text-right">
+                                  <div className="text-right flex-shrink-0">
                                       <p className="text-sm font-semibold">{formatCurrency(session.total_cost)}</p>
                                       <p className="text-xs text-muted-foreground">
                                           {new Date(session.last_used).toLocaleDateString()}
@@ -507,75 +640,60 @@ export const UsageDashboard: React.FC<UsageDashboardProps> = ({ onBack }) => {
                     <Calendar className="h-4 w-4" />
                     <span>日常使用情况</span>
                   </h3>
-                  {stats.by_date.length > 0 ? (() => {
-                    const maxCost = Math.max(...stats.by_date.map(d => d.total_cost), 0);
-                    const halfMaxCost = maxCost / 2;
-
-                    return (
-                      <div className="relative pl-8 pr-4">
-                        {/* Y-axis labels */}
-                        <div className="absolute left-0 top-0 bottom-8 flex flex-col justify-between text-xs text-muted-foreground">
-                          <span>{formatCurrency(maxCost)}</span>
-                          <span>{formatCurrency(halfMaxCost)}</span>
-                          <span>{formatCurrency(0)}</span>
-                        </div>
-                        
-                        {/* Chart container */}
-                        <div className="flex items-end space-x-2 h-64 border-l border-b border-border pl-4">
-                          {stats.by_date.slice().reverse().map((day) => {
-                            const heightPercent = maxCost > 0 ? (day.total_cost / maxCost) * 100 : 0;
-                            const date = new Date(day.date.replace(/-/g, '/'));
-                            const formattedDate = date.toLocaleDateString('en-US', {
-                              weekday: 'short',
-                              month: 'short',
-                              day: 'numeric'
-                            });
-                            
-                            return (
-                              <div key={day.date} className="flex-1 h-full flex flex-col items-center justify-end group relative">
-                                {/* Tooltip */}
-                                <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
-                                  <div className="bg-background border border-border rounded-lg shadow-lg p-3 whitespace-nowrap">
-                                    <p className="text-sm font-semibold">{formattedDate}</p>
-                                    <p className="text-sm text-muted-foreground mt-1">
-                                      成本： {formatCurrency(day.total_cost)}
-                                    </p>
-                                    <p className="text-xs text-muted-foreground">
-                                      {formatTokens(day.total_tokens)} 个令牌
-                                    </p>
-                                    <p className="text-xs text-muted-foreground">
-                                      {day.models_used.length} 个模型
-                                    </p>
-                                  </div>
-                                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
-                                    <div className="border-4 border-transparent border-t-border"></div>
-                                  </div>
-                                </div>
-                                
-                                {/* Bar */}
-                                <div 
-                                  className="w-full bg-[#d97757] hover:opacity-80 transition-opacity rounded-t cursor-pointer"
-                                  style={{ height: `${heightPercent}%` }}
-                                />
-                                
-                                {/* X-axis label – absolutely positioned below the bar so it doesn't affect bar height */}
-                                <div
-                                  className="absolute left-1/2 top-full mt-1 -translate-x-1/2 text-xs text-muted-foreground -rotate-45 origin-top-left whitespace-nowrap pointer-events-none"
-                                >
-                                  {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                        
-                        {/* X-axis label */}
-                        <div className="mt-8 text-center text-xs text-muted-foreground">
-                          日常使用情况随时间变化
-                        </div>
+                  {chartData ? (
+                    <div className="relative pl-8 pr-4">
+                      {/* Y-axis labels - aligned with actual chart area */}
+                      <div className="absolute left-0 top-0 h-64 flex flex-col justify-between text-xs text-muted-foreground">
+                        <span>{formatCurrency(chartData.maxCost)}</span>
+                        <span>{formatCurrency(chartData.halfMaxCost)}</span>
+                        <span>{formatCurrency(0)}</span>
                       </div>
-                    )
-                  })() : (
+                      
+                      {/* Chart container - Isolated and optimized */}
+                      <div 
+                        className="flex items-end space-x-2 h-64 border-l border-b border-border pl-4 relative overflow-visible"
+                        style={{
+                          contain: 'layout style', // Use layout style containment to allow overflow
+                          isolation: 'isolate', // Create new stacking context
+                          marginBottom: '2rem' // Space for X-axis labels without affecting chart alignment
+                        }}
+                      >
+                        {chartData.dateData.map((day) => {
+                          const heightPercent = chartData.maxCost > 0 ? (day.total_cost / chartData.maxCost) * 100 : 0;
+                          const date = new Date(day.date.replace(/-/g, '/'));
+                          
+                          return (
+                            <div 
+                              key={day.date} 
+                              className="flex-1 h-full flex flex-col items-center justify-end relative"
+                            >
+                              {/* Bar with optimized mouse events */}
+                              <div 
+                                className="w-full bg-[#d97757] hover:opacity-80 transition-opacity rounded-t cursor-pointer"
+                                style={{ 
+                                  height: `${heightPercent}%`,
+                                  willChange: 'opacity' // Optimize for hover animation
+                                }}
+                                onMouseEnter={(e) => handleMouseEnter(day, e)}
+                                onMouseMove={handleMouseMove}
+                                onMouseLeave={handleMouseLeave}
+                              />
+                              
+                              {/* X-axis label */}
+                              <div className="absolute left-1/2 top-full mt-1 -translate-x-1/2 text-xs text-muted-foreground -rotate-45 origin-top-left whitespace-nowrap pointer-events-none">
+                                {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      
+                      {/* X-axis label */}
+                      <div className="mt-6 text-center text-xs text-muted-foreground">
+                        日常使用情况随时间变化
+                      </div>
+                    </div>
+                  ) : (
                     <div className="text-center py-8 text-sm text-muted-foreground">
                       所选时期内无使用数据
                     </div>
@@ -586,6 +704,14 @@ export const UsageDashboard: React.FC<UsageDashboardProps> = ({ onBack }) => {
           </motion.div>
         ) : null}
       </div>
+
+      {/* Portal tooltip - rendered outside main tree to avoid layout impact */}
+      <TooltipPortal
+        data={tooltipData}
+        position={tooltipPosition}
+        formatCurrency={formatCurrency}
+        formatTokens={formatTokens}
+      />
     </div>
   );
 }; 
