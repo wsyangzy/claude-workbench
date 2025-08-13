@@ -247,8 +247,10 @@ export const Settings: React.FC<SettingsProps> = ({
         env: envVars
           .filter(envVar => envVar.enabled) // 只保存启用的环境变量
           .reduce((acc, { key, value }) => {
-            if (key.trim() && value.trim()) {
-              acc[key] = value;
+            const keyStr = String(key || '').trim();
+            const valueStr = String(value || '').trim();
+            if (keyStr && valueStr) {
+              acc[keyStr] = valueStr;
             }
             return acc;
           }, {} as Record<string, string>),
@@ -538,10 +540,15 @@ export const Settings: React.FC<SettingsProps> = ({
                         type="number"
                         min="1"
                         placeholder="30"
-                        value={settings?.cleanupPeriodDays || ""}
+                        value={settings?.cleanupPeriodDays?.toString() || ""}
                         onChange={(e) => {
-                          const value = e.target.value ? parseInt(e.target.value) : undefined;
-                          updateSetting("cleanupPeriodDays", value);
+                          const value = e.target.value;
+                          if (value === "") {
+                            updateSetting("cleanupPeriodDays", "");
+                          } else {
+                            const numValue = parseInt(value);
+                            updateSetting("cleanupPeriodDays", isNaN(numValue) ? "" : numValue);
+                          }
                         }}
                       />
                       <p className="text-xs text-muted-foreground">
