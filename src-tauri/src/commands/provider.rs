@@ -16,6 +16,8 @@ pub struct ProviderConfig {
     pub auth_token: Option<String>,  // 对应 ANTHROPIC_AUTH_TOKEN
     #[serde(default, deserialize_with = "deserialize_optional_string")]
     pub model: Option<String>,       // 对应 ANTHROPIC_MODEL
+    #[serde(default, deserialize_with = "deserialize_optional_string")]
+    pub small_fast_model: Option<String>,  // 对应 ANTHROPIC_SMALL_FAST_MODEL
 }
 
 // 自定义反序列化函数，将空字符串转换为None
@@ -32,6 +34,7 @@ pub struct CurrentConfig {
     pub anthropic_base_url: Option<String>,
     pub anthropic_auth_token: Option<String>,
     pub anthropic_model: Option<String>,
+    pub anthropic_small_fast_model: Option<String>,
 }
 
 // Claude settings.json 文件结构
@@ -197,6 +200,7 @@ pub fn get_current_provider_config() -> Result<CurrentConfig, String> {
         anthropic_base_url: settings.env.get("ANTHROPIC_BASE_URL").cloned(),
         anthropic_auth_token: settings.env.get("ANTHROPIC_AUTH_TOKEN").cloned(),
         anthropic_model: settings.env.get("ANTHROPIC_MODEL").cloned(),
+        anthropic_small_fast_model: settings.env.get("ANTHROPIC_SMALL_FAST_MODEL").cloned(),
     })
 }
 
@@ -313,6 +317,7 @@ fn save_claude_settings(settings: &ClaudeSettings) -> Result<(), String> {
         merged_env.remove("ANTHROPIC_BASE_URL");
         merged_env.remove("ANTHROPIC_AUTH_TOKEN");
         merged_env.remove("ANTHROPIC_MODEL");
+        merged_env.remove("ANTHROPIC_SMALL_FAST_MODEL");
         merged_env.remove("ANTHROPIC_API_KEY"); // 清理旧的API_KEY字段
         
         // 然后添加新的环境变量
@@ -347,6 +352,7 @@ pub async fn switch_provider_config(app: tauri::AppHandle, config: ProviderConfi
     // 清除所有ANTHROPIC相关的配置，然后重新设置
     settings.env.remove("ANTHROPIC_MODEL");
     settings.env.remove("ANTHROPIC_AUTH_TOKEN");
+    settings.env.remove("ANTHROPIC_SMALL_FAST_MODEL");
     
     // 更新 ANTHROPIC 相关配置，保留其他配置（如 CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC, API_TIMEOUT_MS 等）
     settings.env.insert("ANTHROPIC_BASE_URL".to_string(), config.base_url.clone());
@@ -357,6 +363,10 @@ pub async fn switch_provider_config(app: tauri::AppHandle, config: ProviderConfi
     
     if let Some(model) = &config.model {
         settings.env.insert("ANTHROPIC_MODEL".to_string(), model.clone());
+    }
+    
+    if let Some(small_fast_model) = &config.small_fast_model {
+        settings.env.insert("ANTHROPIC_SMALL_FAST_MODEL".to_string(), small_fast_model.clone());
     }
     
     // 保存设置
@@ -378,6 +388,7 @@ pub async fn clear_provider_config(app: tauri::AppHandle) -> Result<String, Stri
     settings.env.remove("ANTHROPIC_AUTH_TOKEN");
     settings.env.remove("ANTHROPIC_API_KEY");
     settings.env.remove("ANTHROPIC_MODEL");
+    settings.env.remove("ANTHROPIC_SMALL_FAST_MODEL");
     
     // 保存设置
     save_claude_settings(&settings)?;
@@ -397,7 +408,7 @@ fn detect_current_provider(configs: &[ProviderConfig]) -> Option<String> {
     };
     
     // 关键比较字段
-    let key_fields = ["ANTHROPIC_BASE_URL", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_MODEL"];
+    let _key_fields = ["ANTHROPIC_BASE_URL", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_MODEL", "ANTHROPIC_SMALL_FAST_MODEL"];
     
     // 比较找到匹配的配置
     for provider_config in configs {
@@ -419,6 +430,13 @@ fn detect_current_provider(configs: &[ProviderConfig]) -> Option<String> {
         let current_model = current_config.anthropic_model.as_deref().unwrap_or("");
         let provider_model = provider_config.model.as_deref().unwrap_or("");
         if current_model != provider_model {
+            matches = false;
+        }
+        
+        // 比较 ANTHROPIC_SMALL_FAST_MODEL (可选)
+        let current_small_fast_model = current_config.anthropic_small_fast_model.as_deref().unwrap_or("");
+        let provider_small_fast_model = provider_config.small_fast_model.as_deref().unwrap_or("");
+        if current_small_fast_model != provider_small_fast_model {
             matches = false;
         }
         

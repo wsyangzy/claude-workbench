@@ -353,6 +353,7 @@ export interface ProviderConfig {
   base_url: string;
   auth_token?: string;  // 对应 ANTHROPIC_AUTH_TOKEN
   model?: string;       // 对应 ANTHROPIC_MODEL
+  small_fast_model?: string;  // 对应 ANTHROPIC_SMALL_FAST_MODEL
 }
 
 /**
@@ -362,6 +363,7 @@ export interface CurrentProviderConfig {
   anthropic_base_url?: string;
   anthropic_auth_token?: string;
   anthropic_model?: string;
+  anthropic_small_fast_model?: string;
 }
 
 /**

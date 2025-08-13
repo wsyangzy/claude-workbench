@@ -239,6 +239,44 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
       {/* Content */}
       <div className="flex-1 overflow-auto p-6">
         <div className="max-w-4xl mx-auto space-y-4">
+          {/* Current Status Display - 只在有代理商时显示 */}
+          {presets.length > 0 && (
+            <div className="p-4 bg-muted/30 rounded-lg border">
+              <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
+                <Settings2 className="h-4 w-4" />
+                当前配置状态
+              </h3>
+              <div className="space-y-2 text-sm">
+                {currentProviderId ? (
+                  currentProviderId === "custom" ? (
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="h-4 w-4 text-orange-500" />
+                      <span className="text-orange-700">自定义配置 (未在预设列表中)</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-green-500" />
+                      <span className="text-green-700">
+                        正在使用: {presets.find(p => p.id === currentProviderId)?.name || currentProviderId}
+                      </span>
+                    </div>
+                  )
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4 text-gray-500" />
+                    <span className="text-gray-600">未配置任何代理商</span>
+                  </div>
+                )}
+                
+                {currentConfig?.anthropic_base_url && (
+                  <p className="text-muted-foreground">
+                    API地址: {currentConfig.anthropic_base_url}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
           {presets.length === 0 ? (
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
@@ -274,6 +312,9 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
                     <p><span className="font-medium">API地址：</span>{config.base_url}</p>
                     {config.model && (
                       <p><span className="font-medium">模型：</span>{config.model}</p>
+                    )}
+                    {config.small_fast_model && (
+                      <p><span className="font-medium">Haiku 类模型名称：</span>{config.small_fast_model}</p>
                     )}
                   </div>
                 </div>
@@ -345,43 +386,6 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
             ))
           )}
 
-          {/* Current Status Display */}
-          {presets.length > 0 && (
-            <div className="mt-6 p-4 bg-muted/30 rounded-lg border">
-              <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
-                <Settings2 className="h-4 w-4" />
-                当前配置状态
-              </h3>
-              <div className="space-y-2 text-sm">
-                {currentProviderId ? (
-                  currentProviderId === "custom" ? (
-                    <div className="flex items-center gap-2">
-                      <AlertCircle className="h-4 w-4 text-orange-500" />
-                      <span className="text-orange-700">自定义配置 (未在预设列表中)</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-green-500" />
-                      <span className="text-green-700">
-                        正在使用: {presets.find(p => p.id === currentProviderId)?.name || currentProviderId}
-                      </span>
-                    </div>
-                  )
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <AlertCircle className="h-4 w-4 text-gray-500" />
-                    <span className="text-gray-600">未配置任何代理商</span>
-                  </div>
-                )}
-                
-                {currentConfig?.anthropic_base_url && (
-                  <p className="text-muted-foreground">
-                    API地址: {currentConfig.anthropic_base_url}
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
 
           {/* Toggle tokens visibility */}
           {presets.length > 0 && (
@@ -434,6 +438,14 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
                     <p className="font-medium text-sm">ANTHROPIC_MODEL</p>
                     <p className="text-sm text-muted-foreground font-mono bg-muted p-2 rounded">
                       {currentConfig.anthropic_model}
+                    </p>
+                  </div>
+                )}
+                {currentConfig.anthropic_small_fast_model && (
+                  <div>
+                    <p className="font-medium text-sm">ANTHROPIC_SMALL_FAST_MODEL</p>
+                    <p className="text-sm text-muted-foreground font-mono bg-muted p-2 rounded">
+                      {currentConfig.anthropic_small_fast_model}
                     </p>
                   </div>
                 )}

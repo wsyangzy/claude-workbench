@@ -30,6 +30,7 @@ export default function ProviderForm({
     base_url: initialData?.base_url || '',
     auth_token: initialData?.auth_token || '',
     model: initialData?.model || '',
+    small_fast_model: initialData?.small_fast_model || '',
   });
   
   const [loading, setLoading] = useState(false);
@@ -78,6 +79,7 @@ export default function ProviderForm({
         // 清理空值
         auth_token: formData.auth_token?.trim() || undefined,
         model: formData.model?.trim() || undefined,
+        small_fast_model: formData.small_fast_model?.trim() || undefined,
       };
 
       await onSubmit(submitData);
@@ -198,6 +200,20 @@ export default function ProviderForm({
                   />
                   <p className="text-xs text-muted-foreground">
                     部分代理商需要指定特定的模型名称
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="small_fast_model">Haiku 类模型名称</Label>
+                  <Input
+                    id="small_fast_model"
+                    value={formData.small_fast_model || ''}
+                    onChange={(e) => handleInputChange('small_fast_model', e.target.value)}
+                    placeholder="claude-3-5-haiku-20241022 (可选)"
+                    disabled={loading}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    对应 ANTHROPIC_SMALL_FAST_MODEL 环境变量
                   </p>
                 </div>
               </div>
