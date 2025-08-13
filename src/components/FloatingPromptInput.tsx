@@ -125,9 +125,15 @@ const THINKING_MODES: ThinkingModeConfig[] = [
 ];
 
 /**
- * ThinkingModeIndicator component - Shows visual indicator bars for thinking level
+ * ThinkingModeIndicator component - Shows "Auto" text for level 0, visual indicator bars for other levels
  */
 const ThinkingModeIndicator: React.FC<{ level: number }> = ({ level }) => {
+  if (level === 0) {
+    return (
+      <span className="text-xs font-medium text-muted-foreground">Auto</span>
+    );
+  }
+  
   return (
     <div className="flex items-center gap-0.5">
       {[1, 2, 3, 4].map((i) => (
@@ -1012,7 +1018,6 @@ const FloatingPromptInputInner = (
         )}
         style={{
           paddingBottom: 'env(safe-area-inset-bottom)',
-          minHeight: '80px', // 确保最小高度
         }}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
@@ -1057,7 +1062,7 @@ const FloatingPromptInputInner = (
             />
           )}
 
-          <div className="p-4">
+          <div className="p-4 min-h-[80px] flex flex-col justify-center">
             <div className="flex items-end gap-3">
               {/* Model Picker */}
               <Popover
@@ -1066,7 +1071,7 @@ const FloatingPromptInputInner = (
                     variant="outline"
                     size="default"
                     disabled={disabled}
-                    className="gap-2 min-w-[180px] justify-start"
+                    className="gap-2 min-w-[180px] justify-start h-10"
                   >
                     {selectedModelData.icon}
                     <span className="flex-1 text-left">{selectedModelData.name}</span>
@@ -1115,7 +1120,7 @@ const FloatingPromptInputInner = (
                           variant="outline"
                           size="default"
                           disabled={disabled}
-                          className="gap-2"
+                          className="gap-2 h-10"
                         >
                           <Brain className="h-4 w-4" />
                           <ThinkingModeIndicator 
@@ -1176,7 +1181,7 @@ const FloatingPromptInputInner = (
                   placeholder={dragActive ? "Drop images here..." : "Ask Claude anything..."}
                   disabled={disabled}
                   className={cn(
-                    "min-h-[56px] max-h-[160px] resize-none pr-10",
+                    "min-h-[40px] max-h-[160px] resize-none pr-10 leading-5",
                     dragActive && "border-primary"
                   )}
                   rows={1}
@@ -1243,7 +1248,7 @@ const FloatingPromptInputInner = (
                 disabled={isLoading ? false : (!prompt.trim() || disabled)}
                 variant={isLoading ? "destructive" : "default"}
                 size="default"
-                className="min-w-[60px]"
+                className="min-w-[60px] h-10"
               >
                 {isLoading ? (
                   <>
