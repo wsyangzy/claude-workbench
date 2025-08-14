@@ -10,7 +10,6 @@ import {
   AlertCircle,
   HardDrive,
   Save,
-  Settings,
   Trash2
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
@@ -37,7 +36,6 @@ export const CheckpointSettings: React.FC<CheckpointSettingsProps> = ({
   sessionId,
   projectId,
   projectPath,
-  onClose,
   className,
 }) => {
   const [autoCheckpointEnabled, setAutoCheckpointEnabled] = useState(true);
