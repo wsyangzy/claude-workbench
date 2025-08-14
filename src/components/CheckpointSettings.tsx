@@ -1,19 +1,19 @@
-import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { 
-  Settings,
-  Save,
-  Trash2,
-  HardDrive,
-  AlertCircle
-} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { SelectComponent, type SelectOption } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { SelectComponent, type SelectOption } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { api, type CheckpointStrategy } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
+import {
+  AlertCircle,
+  HardDrive,
+  Save,
+  Settings,
+  Trash2
+} from "lucide-react";
+import React, { useEffect, useState } from "react";
 
 interface CheckpointSettingsProps {
   sessionId: string;
@@ -134,17 +134,6 @@ export const CheckpointSettings: React.FC<CheckpointSettingsProps> = ({
       exit={{ opacity: 0, y: -20 }}
       className={cn("space-y-6", className)}
     >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Settings className="h-5 w-5" />
-          <h3 className="text-lg font-semibold">检查点设置</h3>
-        </div>
-        {onClose && (
-          <Button variant="ghost" size="sm" onClick={onClose}>
-            关闭
-          </Button>
-        )}
-      </div>
 
       {/* Experimental Feature Warning */}
       <div className="rounded-lg border border-yellow-500/50 bg-yellow-500/10 p-3">

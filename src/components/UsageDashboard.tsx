@@ -1,23 +1,23 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { createPortal } from "react-dom";
-import { motion } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { api, type UsageStats, type ProjectUsage, type ApiBaseUrlUsage } from "@/lib/api";
-import { 
-  ArrowLeft, 
-  TrendingUp, 
-  Calendar, 
+import { api, type ApiBaseUrlUsage, type ProjectUsage, type UsageStats } from "@/lib/api";
+import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
+import {
+  Activity,
+  ArrowLeft,
+  Briefcase,
+  Calendar,
+  DollarSign,
+  FileText,
   Filter,
   Loader2,
-  DollarSign,
-  Activity,
-  FileText,
-  Briefcase
+  TrendingUp
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 
 interface UsageDashboardProps {
   /**
@@ -51,46 +51,44 @@ const TooltipPortal = React.memo<TooltipPortalProps>(({ data, position, formatCu
     day: 'numeric'
   });
 
-  // Use more accurate tooltip dimensions based on content
-  const TOOLTIP_WIDTH = 160; // Reduced width for better visual appearance
+  // Dynamic tooltip dimensions - calculate based on content
   const TOOLTIP_HEIGHT = 120;
-  const OFFSET = 10;
+  const OFFSET = 15; // Consistent offset for visual separation
+  
+  // Use a more compact fixed width
+  const TOOLTIP_WIDTH = 140;
   
   let x, y;
   
-  // Precise horizontal positioning with consistent distance
+  // Precise horizontal positioning - ensure minimum distance between tooltip edge and cursor
   const spaceOnRight = window.innerWidth - position.x;
   const spaceOnLeft = position.x;
   
-  if (spaceOnRight >= TOOLTIP_WIDTH + OFFSET + 20) {
-    // Enough space on right
+  if (spaceOnRight >= TOOLTIP_WIDTH + OFFSET + 30) {
+    // Enough space on right - tooltip starts OFFSET pixels to the right of cursor
     x = position.x + OFFSET;
-  } else if (spaceOnLeft >= TOOLTIP_WIDTH + OFFSET + 20) {
-    // Not enough space on right, use left
+  } else if (spaceOnLeft >= TOOLTIP_WIDTH + OFFSET + 30) {
+    // Not enough space on right, use left - tooltip ends OFFSET pixels to the left of cursor  
     x = position.x - OFFSET - TOOLTIP_WIDTH;
   } else {
     // Extreme case - center tooltip
-    x = (window.innerWidth - TOOLTIP_WIDTH) / 2;
+    x = Math.max(10, Math.min(position.x - TOOLTIP_WIDTH / 2, window.innerWidth - TOOLTIP_WIDTH - 10));
   }
   
-  // Vertical positioning with consistent distance
+  // Vertical positioning - always above cursor
   const spaceAbove = position.y;
-  const spaceBelow = window.innerHeight - position.y;
   
-  if (spaceAbove >= TOOLTIP_HEIGHT + OFFSET + 20) {
-    // Enough space above
+  if (spaceAbove >= TOOLTIP_HEIGHT + OFFSET + 30) {
+    // Display above - tooltip ends OFFSET pixels above cursor
     y = position.y - OFFSET - TOOLTIP_HEIGHT;
-  } else if (spaceBelow >= TOOLTIP_HEIGHT + OFFSET + 20) {
-    // Not enough space above, use below
-    y = position.y + OFFSET;
   } else {
-    // Extreme case - center tooltip vertically
-    y = (window.innerHeight - TOOLTIP_HEIGHT) / 2;
+    // Not enough space above - center tooltip vertically in available space
+    y = Math.max(10, Math.min(position.y - TOOLTIP_HEIGHT / 2, window.innerHeight - TOOLTIP_HEIGHT - 10));
   }
   
-  // Final boundary protection
-  x = Math.max(5, Math.min(x, window.innerWidth - TOOLTIP_WIDTH - 5));
-  y = Math.max(5, Math.min(y, window.innerHeight - TOOLTIP_HEIGHT - 5));
+  // Ensure tooltip stays within viewport bounds
+  x = Math.max(10, Math.min(x, window.innerWidth - TOOLTIP_WIDTH - 10));
+  y = Math.max(10, Math.min(y, window.innerHeight - TOOLTIP_HEIGHT - 10));
 
   return createPortal(
     <div
@@ -101,7 +99,7 @@ const TooltipPortal = React.memo<TooltipPortalProps>(({ data, position, formatCu
         transform: 'translateZ(0)' // Force GPU layer to avoid reflows
       }}
     >
-      <div className="bg-background border border-border rounded-lg shadow-lg p-3 whitespace-nowrap">
+      <div className="bg-background border border-border rounded-lg shadow-lg p-3 whitespace-nowrap" style={{ width: `${TOOLTIP_WIDTH}px` }}>
         <p className="text-sm font-semibold">{formattedDate}</p>
         <p className="text-sm text-muted-foreground mt-1">
           成本： {formatCurrency(data.total_cost)}

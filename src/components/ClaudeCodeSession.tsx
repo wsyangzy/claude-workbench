@@ -1181,7 +1181,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
             {/* Loading Indicator in Toolbar */}
             {isLoading && (
               <div className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-md text-xs text-blue-600">
-                <div className="rotating-symbol text-blue-600" style={{ width: '12px', height: '12px' }} />
+                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse flex-shrink-0" />
                 <span>处理中...</span>
               </div>
             )}
@@ -1340,7 +1340,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
               {isLoading && messages.length === 0 && (
                 <div className="flex items-center justify-center h-full">
                   <div className="flex items-center gap-3">
-                    <div className="rotating-symbol text-primary" />
+                    <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse flex-shrink-0" />
                     <span className="text-sm text-muted-foreground">
                       {session ? "加载会话历史记录..." : "初始化 Claude Code..."}
                     </span>
@@ -1427,7 +1427,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
                       initial={{ opacity: 0, y: 20, scale: 0.8 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 20, scale: 0.8 }}
-                      className="floating-element backdrop-enhanced rounded-full px-3 py-2 cursor-pointer hover:bg-accent"
+                      className="floating-element backdrop-enhanced rounded-full px-3 py-2 cursor-pointer hover:bg-accent w-24 flex justify-center"
                       onClick={() => {
                         setUserScrolled(false);
                         setShouldAutoScroll(true);
@@ -1440,7 +1440,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
                       }}
                       title="New messages - click to scroll to bottom"
                     >
-                      <div className="flex items-center gap-2 text-sm">
+                      <div className="flex items-center gap-2 text-sm whitespace-nowrap ml-1">
                         <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
                         <span>新消息</span>
                         <ChevronDown className="h-3 w-3" />
@@ -1450,7 +1450,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
                 </AnimatePresence>
                 
                 {/* Traditional scroll controls */}
-                <div className="flex items-center floating-element backdrop-enhanced rounded-full overflow-hidden">
+                <div className="flex items-center floating-element backdrop-enhanced rounded-full overflow-hidden w-24 justify-center">
                   <Button
                     variant="ghost"
                     size="sm"
@@ -1514,13 +1514,25 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
         {/* Timeline */}
         <AnimatePresence>
           {showTimeline && effectiveSession && (
-            <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 20, stiffness: 300 }}
-              className="fixed right-0 top-0 h-full w-full sm:w-96 bg-background border-l border-border shadow-xl z-30 overflow-hidden"
-            >
+            <>
+              {/* Background overlay for closing on outside click */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-20"
+                onClick={() => setShowTimeline(false)}
+              />
+              
+              {/* Timeline panel */}
+              <motion.div
+                initial={{ x: "100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "100%" }}
+                transition={{ type: "spring", damping: 20, stiffness: 300 }}
+                className="fixed right-0 top-0 h-full w-full sm:w-96 bg-background border-l border-border shadow-xl z-30 overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+              >
               <div className="h-full flex flex-col">
                 {/* Timeline Header */}
                 <div className="flex items-center justify-between p-4 border-b border-border">
@@ -1549,6 +1561,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
                 </div>
               </div>
             </motion.div>
+            </>
           )}
         </AnimatePresence>
       </div>
@@ -1602,6 +1615,9 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
       {showSettings && effectiveSession && (
         <Dialog open={showSettings} onOpenChange={setShowSettings}>
           <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>检查点设置</DialogTitle>
+            </DialogHeader>
             <CheckpointSettings
               sessionId={effectiveSession.id}
               projectId={effectiveSession.project_id}
