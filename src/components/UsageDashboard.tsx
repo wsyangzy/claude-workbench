@@ -459,16 +459,16 @@ export const UsageDashboard: React.FC<UsageDashboardProps> = ({ onBack }) => {
                     <h3 className="text-sm font-semibold mb-4">热门项目</h3>
                     <div className="space-y-3">
                       {stats.by_project.slice(0, 3).map((project) => (
-                        <div key={project.project_path} className="flex items-center justify-between">
-                          <div className="flex flex-col">
-                            <span className="text-sm font-medium truncate max-w-[200px]" title={project.project_path}>
+                        <div key={project.project_path} className="flex items-center justify-between gap-4">
+                          <div className="flex flex-col min-w-0 flex-1">
+                            <span className="text-sm font-medium break-words" title={project.project_path}>
                               {project.project_path}
                             </span>
                             <span className="text-xs text-muted-foreground">
                               {project.session_count} 个会话
                             </span>
                           </div>
-                          <span className="text-sm font-medium">
+                          <span className="text-sm font-medium flex-shrink-0">
                             {formatCurrency(project.total_cost)}
                           </span>
                         </div>
@@ -578,7 +578,15 @@ export const UsageDashboard: React.FC<UsageDashboardProps> = ({ onBack }) => {
                                   <div className="text-right flex-shrink-0">
                                       <p className="text-sm font-semibold">{formatCurrency(session.total_cost)}</p>
                                       <p className="text-xs text-muted-foreground">
-                                          {new Date(session.last_used).toLocaleDateString()}
+                                          {new Date(session.last_used).toLocaleString('zh-CN', {
+                                            year: 'numeric',
+                                            month: '2-digit',
+                                            day: '2-digit',
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                            second: '2-digit',
+                                            hour12: false
+                                          })}
                                       </p>
                                   </div>
                               </div>

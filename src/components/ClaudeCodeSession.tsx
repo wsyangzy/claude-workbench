@@ -1180,8 +1180,8 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
           <div className="flex items-center gap-2">
             {/* Loading Indicator in Toolbar */}
             {isLoading && (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-md text-xs text-blue-600">
-                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse flex-shrink-0" />
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-md text-xs">
+                <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse flex-shrink-0" />
                 <span>处理中...</span>
               </div>
             )}
@@ -1340,7 +1340,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
               {isLoading && messages.length === 0 && (
                 <div className="flex items-center justify-center h-full">
                   <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse flex-shrink-0" />
+                    <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse flex-shrink-0" />
                     <span className="text-sm text-muted-foreground">
                       {session ? "加载会话历史记录..." : "初始化 Claude Code..."}
                     </span>

@@ -310,21 +310,32 @@ export const SlashCommandPicker: React.FC<SlashCommandPickerProps> = ({
                               "w-full flex items-start gap-3 px-3 py-2 rounded-md",
                               "hover:bg-accent transition-colors",
                               "text-left",
-                              isSelected && "bg-accent"
+                              isSelected ? "bg-blue-500 text-white" : "hover:bg-accent"
                             )}
                           >
-                            <Icon className="h-4 w-4 text-muted-foreground mt-1 flex-shrink-0" />
+                            <Icon className={cn(
+                              "h-4 w-4 mt-1 flex-shrink-0",
+                              isSelected ? "text-white/90" : "text-muted-foreground"
+                            )} />
                             <div className="flex-1 overflow-hidden">
                               <div className="flex items-center gap-2">
                                 <span className="font-medium">
                                   {command.full_command}
                                 </span>
-                                <span className="text-xs text-muted-foreground px-1.5 py-0.5 bg-muted rounded">
+                                <span className={cn(
+                                  "text-xs px-1.5 py-0.5 rounded",
+                                  isSelected 
+                                    ? "text-white/90 bg-white/20" 
+                                    : "text-muted-foreground bg-muted"
+                                )}>
                                   {command.scope}
                                 </span>
                               </div>
                               {command.description && (
-                                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                                <p className={cn(
+                                  "text-xs mt-1 leading-relaxed",
+                                  isSelected ? "text-white/90" : "text-muted-foreground"
+                                )}>
                                   {command.description}
                                 </p>
                               )}
