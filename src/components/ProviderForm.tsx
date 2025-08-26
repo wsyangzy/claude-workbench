@@ -29,6 +29,7 @@ export default function ProviderForm({
     description: initialData?.description || '',
     base_url: initialData?.base_url || '',
     auth_token: initialData?.auth_token || '',
+    api_key: initialData?.api_key || '',
     model: initialData?.model || '',
     small_fast_model: initialData?.small_fast_model || '',
   });
@@ -56,9 +57,19 @@ export default function ProviderForm({
     if (!formData.base_url.startsWith('http://') && !formData.base_url.startsWith('https://')) {
       return 'API地址必须以 http:// 或 https:// 开头';
     }
-    if (!formData.auth_token?.trim()) {
-      return '请填写认证Token';
+    
+    // 验证认证信息：必须且只能选择一个
+    const hasAuthToken = formData.auth_token?.trim();
+    const hasApiKey = formData.api_key?.trim();
+    
+    if (!hasAuthToken && !hasApiKey) {
+      return '请填写认证Token或API Key（二选一）';
     }
+    
+    if (hasAuthToken && hasApiKey) {
+      return '认证Token和API Key只能填写一个，不能同时填写';
+    }
+    
     return null;
   };
 
@@ -78,6 +89,7 @@ export default function ProviderForm({
         ...formData,
         // 清理空值
         auth_token: formData.auth_token?.trim() || undefined,
+        api_key: formData.api_key?.trim() || undefined,
         model: formData.model?.trim() || undefined,
         small_fast_model: formData.small_fast_model?.trim() || undefined,
       };
@@ -155,13 +167,13 @@ export default function ProviderForm({
                 <Eye className="h-4 w-4" />
                 认证信息
                 <span className="text-xs text-muted-foreground ml-2">
-                  (必填)
+                  (选择一种认证方式)
                 </span>
               </h3>
               
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="auth_token">认证 Token</Label>
+                  <Label htmlFor="auth_token">Auth Token</Label>
                   <div className="relative">
                     <Input
                       id="auth_token"
@@ -170,14 +182,14 @@ export default function ProviderForm({
                       onChange={(e) => handleInputChange('auth_token', e.target.value)}
                       placeholder="sk-ant-..."
                       disabled={loading}
-                      className="pr-12 [&::-webkit-credentials-auto-fill-button]:!hidden [&::-ms-reveal]:!hidden" // 为按钮预留空间并隐藏浏览器默认按钮
-                      autoComplete="new-password" // 防止浏览器干预
+                      className="pr-12 [&::-webkit-credentials-auto-fill-button]:!hidden [&::-ms-reveal]:!hidden"
+                      autoComplete="new-password"
                     />
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="absolute right-1 top-1 h-8 w-10 p-0 bg-transparent hover:bg-muted/20" // 使用透明背景，悬停时显示浅色
+                      className="absolute right-1 top-1 h-8 w-10 p-0 bg-transparent hover:bg-muted/20"
                       onClick={() => setShowTokens(!showTokens)}
                     >
                       {showTokens ? (
@@ -187,6 +199,41 @@ export default function ProviderForm({
                       )}
                     </Button>
                   </div>
+                  <p className="text-xs text-muted-foreground">
+                    对应 ANTHROPIC_AUTH_TOKEN 环境变量
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="api_key">API Key</Label>
+                  <div className="relative">
+                    <Input
+                      id="api_key"
+                      type={showTokens ? "text" : "password"}
+                      value={formData.api_key || ''}
+                      onChange={(e) => handleInputChange('api_key', e.target.value)}
+                      placeholder="sk-ant-..."
+                      disabled={loading}
+                      className="pr-12 [&::-webkit-credentials-auto-fill-button]:!hidden [&::-ms-reveal]:!hidden"
+                      autoComplete="new-password"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-1 top-1 h-8 w-10 p-0 bg-transparent hover:bg-muted/20"
+                      onClick={() => setShowTokens(!showTokens)}
+                    >
+                      {showTokens ? (
+                        <EyeOff className="h-3 w-3" />
+                      ) : (
+                        <Eye className="h-3 w-3" />
+                      )}
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    对应 ANTHROPIC_API_KEY 环境变量
+                  </p>
                 </div>
 
                 <div className="space-y-2">

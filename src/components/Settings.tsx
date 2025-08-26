@@ -97,6 +97,18 @@ export const Settings: React.FC<SettingsProps> = ({
   useEffect(() => {
     loadSettings();
     loadClaudeBinaryPath();
+    
+    // 监听代理商配置变更事件
+    const handleProviderConfigChange = () => {
+      loadSettings(); // 重新加载设置以刷新环境变量
+    };
+    
+    window.addEventListener('provider-config-changed', handleProviderConfigChange);
+    
+    // 清理事件监听器
+    return () => {
+      window.removeEventListener('provider-config-changed', handleProviderConfigChange);
+    };
   }, []);
 
   /**

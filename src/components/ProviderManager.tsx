@@ -38,6 +38,8 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
   const [showForm, setShowForm] = useState(false);
   const [editingProvider, setEditingProvider] = useState<ProviderConfig | null>(null);
   const [toastMessage, setToastMessage] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [providerToDelete, setProviderToDelete] = useState<ProviderConfig | null>(null);
 
   useEffect(() => {
     loadData();
@@ -68,6 +70,10 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
       const message = await api.switchProviderConfig(config);
       setToastMessage({ message, type: 'success' });
       await loadData(); // Refresh current config
+      
+      // 触发 Settings 组件刷新环境变量显示
+      window.dispatchEvent(new CustomEvent('provider-config-changed'));
+      
     } catch (error) {
       console.error('Failed to switch provider:', error);
       setToastMessage({ message: '切换代理商失败', type: 'error' });
@@ -82,6 +88,10 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
       const message = await api.clearProviderConfig();
       setToastMessage({ message, type: 'success' });
       await loadData(); // Refresh current config
+      
+      // 触发 Settings 组件刷新环境变量显示
+      window.dispatchEvent(new CustomEvent('provider-config-changed'));
+      
     } catch (error) {
       console.error('Failed to clear provider:', error);
       setToastMessage({ message: '清理配置失败', type: 'error' });
@@ -114,13 +124,17 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
   };
 
   const handleDeleteProvider = async (config: ProviderConfig) => {
-    if (!confirm(`确定要删除代理商 "${config.name}" 吗？`)) {
-      return;
-    }
+    // 设置要删除的代理商并显示确认对话框
+    setProviderToDelete(config);
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDeleteProvider = async () => {
+    if (!providerToDelete) return;
     
     try {
-      setDeleting(config.id);
-      await api.deleteProviderConfig(config.id);
+      setDeleting(providerToDelete.id);
+      await api.deleteProviderConfig(providerToDelete.id);
       setToastMessage({ message: '代理商删除成功', type: 'success' });
       await loadData();
     } catch (error) {
@@ -128,7 +142,20 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
       setToastMessage({ message: '删除代理商失败', type: 'error' });
     } finally {
       setDeleting(null);
+      setShowDeleteDialog(false);
+      // 延迟清理 providerToDelete，确保对话框完全关闭后再清理
+      setTimeout(() => {
+        setProviderToDelete(null);
+      }, 150);
     }
+  };
+
+  const cancelDeleteProvider = () => {
+    setShowDeleteDialog(false);
+    // 延迟清理 providerToDelete，确保对话框完全关闭后再清理
+    setTimeout(() => {
+      setProviderToDelete(null);
+    }, 150); // 等待Dialog动画完成
   };
 
   const handleFormSubmit = async (formData: Omit<ProviderConfig, 'id'>) => {
@@ -373,12 +400,17 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
                 </div>
               </div>
               
-              {/* 下半部分：跨越全宽的Token显示 */}
-              {config.auth_token && (
+              {/* 下半部分：跨越全宽的Token/API Key显示 */}
+              {(config.auth_token || config.api_key) && (
                 <div className="mt-3 pt-3 border-t border-border/50">
-                  <div className="font-medium text-sm text-muted-foreground mb-2">认证Token：</div>
+                  <div className="font-medium text-sm text-muted-foreground mb-2">
+                    {config.auth_token ? '认证Token：' : 'API Key：'}
+                  </div>
                   <div className="text-sm text-muted-foreground font-mono bg-muted p-3 rounded break-all overflow-hidden">
-                    {showTokens ? config.auth_token : maskToken(config.auth_token)}
+                    {showTokens ? 
+                      (config.auth_token || config.api_key) : 
+                      maskToken(config.auth_token || config.api_key || '')
+                    }
                   </div>
                 </div>
               )}
@@ -401,7 +433,7 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
               ) : (
                 <Eye className="h-3 w-3 mr-1" />
               )}
-              {showTokens ? '隐藏' : '显示'}Token
+              {showTokens ? '隐藏' : '显示'}密钥
             </Button>
           </div>
           )}
@@ -430,6 +462,14 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
                     <p className="font-medium text-sm">ANTHROPIC_AUTH_TOKEN</p>
                     <div className="text-sm text-muted-foreground font-mono bg-muted p-3 rounded break-all overflow-hidden w-full">
                       {showTokens ? currentConfig.anthropic_auth_token : maskToken(currentConfig.anthropic_auth_token)}
+                    </div>
+                  </div>
+                )}
+                {currentConfig.anthropic_api_key && (
+                  <div>
+                    <p className="font-medium text-sm">ANTHROPIC_API_KEY</p>
+                    <div className="text-sm text-muted-foreground font-mono bg-muted p-3 rounded break-all overflow-hidden w-full">
+                      {showTokens ? currentConfig.anthropic_api_key : maskToken(currentConfig.anthropic_api_key)}
                     </div>
                   </div>
                 )}
@@ -463,7 +503,7 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
                     ) : (
                       <Eye className="h-3 w-3 mr-1" />
                     )}
-                    {showTokens ? '隐藏' : '显示'}Token
+                    {showTokens ? '隐藏' : '显示'}密钥
                   </Button>
                 </div>
               </div>
@@ -490,6 +530,46 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
             onSubmit={handleFormSubmit}
             onCancel={handleFormCancel}
           />
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={(open) => {
+        if (!open) {
+          cancelDeleteProvider(); // 使用统一的取消逻辑
+        }
+      }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>确认删除</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p>确定要删除代理商 "{providerToDelete?.name}" 吗？</p>
+            <p className="text-sm text-muted-foreground mt-2">此操作无法撤销。</p>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={cancelDeleteProvider}
+              disabled={deleting === providerToDelete?.id}
+            >
+              取消
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmDeleteProvider}
+              disabled={deleting === providerToDelete?.id}
+            >
+              {deleting === providerToDelete?.id ? (
+                <div className="flex items-center">
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  删除中...
+                </div>
+              ) : (
+                '确认删除'
+              )}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
 

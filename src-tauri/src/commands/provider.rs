@@ -15,6 +15,8 @@ pub struct ProviderConfig {
     #[serde(default, deserialize_with = "deserialize_optional_string")]
     pub auth_token: Option<String>,  // 对应 ANTHROPIC_AUTH_TOKEN
     #[serde(default, deserialize_with = "deserialize_optional_string")]
+    pub api_key: Option<String>,     // 对应 ANTHROPIC_API_KEY
+    #[serde(default, deserialize_with = "deserialize_optional_string")]
     pub model: Option<String>,       // 对应 ANTHROPIC_MODEL
     #[serde(default, deserialize_with = "deserialize_optional_string")]
     pub small_fast_model: Option<String>,  // 对应 ANTHROPIC_SMALL_FAST_MODEL
@@ -33,6 +35,7 @@ where
 pub struct CurrentConfig {
     pub anthropic_base_url: Option<String>,
     pub anthropic_auth_token: Option<String>,
+    pub anthropic_api_key: Option<String>,
     pub anthropic_model: Option<String>,
     pub anthropic_small_fast_model: Option<String>,
 }
@@ -199,6 +202,7 @@ pub fn get_current_provider_config() -> Result<CurrentConfig, String> {
     Ok(CurrentConfig {
         anthropic_base_url: settings.env.get("ANTHROPIC_BASE_URL").cloned(),
         anthropic_auth_token: settings.env.get("ANTHROPIC_AUTH_TOKEN").cloned(),
+        anthropic_api_key: settings.env.get("ANTHROPIC_API_KEY").cloned(),
         anthropic_model: settings.env.get("ANTHROPIC_MODEL").cloned(),
         anthropic_small_fast_model: settings.env.get("ANTHROPIC_SMALL_FAST_MODEL").cloned(),
     })
@@ -352,12 +356,16 @@ pub async fn switch_provider_config(app: tauri::AppHandle, config: ProviderConfi
     // 清除所有ANTHROPIC相关的配置，然后重新设置
     settings.env.remove("ANTHROPIC_MODEL");
     settings.env.remove("ANTHROPIC_AUTH_TOKEN");
+    settings.env.remove("ANTHROPIC_API_KEY");
     settings.env.remove("ANTHROPIC_SMALL_FAST_MODEL");
     
     // 更新 ANTHROPIC 相关配置，保留其他配置（如 CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC, API_TIMEOUT_MS 等）
     settings.env.insert("ANTHROPIC_BASE_URL".to_string(), config.base_url.clone());
     
-    if let Some(auth_token) = &config.auth_token {
+    // 设置认证信息 - 优先使用 API Key，其次是 auth_token
+    if let Some(api_key) = &config.api_key {
+        settings.env.insert("ANTHROPIC_API_KEY".to_string(), api_key.clone());
+    } else if let Some(auth_token) = &config.auth_token {
         settings.env.insert("ANTHROPIC_AUTH_TOKEN".to_string(), auth_token.clone());
     }
     
@@ -408,7 +416,7 @@ fn detect_current_provider(configs: &[ProviderConfig]) -> Option<String> {
     };
     
     // 关键比较字段
-    let _key_fields = ["ANTHROPIC_BASE_URL", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_MODEL", "ANTHROPIC_SMALL_FAST_MODEL"];
+    let _key_fields = ["ANTHROPIC_BASE_URL", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_API_KEY", "ANTHROPIC_MODEL", "ANTHROPIC_SMALL_FAST_MODEL"];
     
     // 比较找到匹配的配置
     for provider_config in configs {
@@ -419,10 +427,17 @@ fn detect_current_provider(configs: &[ProviderConfig]) -> Option<String> {
             matches = false;
         }
         
-        // 比较 ANTHROPIC_AUTH_TOKEN
+        // 比较认证信息 - 检查API Key和Auth Token
         let current_auth = current_config.anthropic_auth_token.as_deref().unwrap_or("");
+        let current_api_key = current_config.anthropic_api_key.as_deref().unwrap_or("");
         let provider_auth = provider_config.auth_token.as_deref().unwrap_or("");
-        if current_auth != provider_auth {
+        let provider_api_key = provider_config.api_key.as_deref().unwrap_or("");
+        
+        // 认证信息匹配逻辑：要么API Key匹配，要么Auth Token匹配
+        let auth_matches = (current_api_key == provider_api_key && !current_api_key.is_empty()) ||
+                          (current_auth == provider_auth && !current_auth.is_empty());
+        
+        if !auth_matches {
             matches = false;
         }
         
@@ -447,7 +462,8 @@ fn detect_current_provider(configs: &[ProviderConfig]) -> Option<String> {
     
     // 如果没有匹配到预设配置，返回 "custom"
     if current_config.anthropic_base_url.is_some() || 
-       current_config.anthropic_auth_token.is_some() {
+       current_config.anthropic_auth_token.is_some() ||
+       current_config.anthropic_api_key.is_some() {
         Some("custom".to_string())
     } else {
         None
