@@ -552,6 +552,7 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
               variant="outline"
               onClick={cancelDeleteProvider}
               disabled={deleting === providerToDelete?.id}
+              className="hover:!text-gray-600 dark:hover:!text-gray-300"
             >
               取消
             </Button>
@@ -559,6 +560,7 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
               variant="destructive"
               onClick={confirmDeleteProvider}
               disabled={deleting === providerToDelete?.id}
+              className="hover:!text-red-600"
             >
               {deleting === providerToDelete?.id ? (
                 <div className="flex items-center">
