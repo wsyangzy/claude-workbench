@@ -404,7 +404,7 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
               {(config.auth_token || config.api_key) && (
                 <div className="mt-3 pt-3 border-t border-border/50">
                   <div className="font-medium text-sm text-muted-foreground mb-2">
-                    {config.auth_token ? '认证Token：' : 'API Key：'}
+                    {config.auth_token ? 'Auth Token：' : 'API Key：'}
                   </div>
                   <div className="text-sm text-muted-foreground font-mono bg-muted p-3 rounded break-all overflow-hidden">
                     {showTokens ? 

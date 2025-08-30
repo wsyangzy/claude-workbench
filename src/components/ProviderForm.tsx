@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Save, 
   X, 
@@ -24,6 +25,14 @@ export default function ProviderForm({
   onSubmit, 
   onCancel 
 }: ProviderFormProps) {
+  // 确定初始的认证类型
+  const getInitialAuthType = () => {
+    if (initialData?.auth_token) return 'auth_token';
+    if (initialData?.api_key) return 'api_key';
+    return 'auth_token'; // 默认为auth_token
+  };
+
+  const [authType, setAuthType] = useState<'auth_token' | 'api_key'>(getInitialAuthType());
   const [formData, setFormData] = useState<Omit<ProviderConfig, 'id'>>({
     name: initialData?.name || '',
     description: initialData?.description || '',
@@ -45,6 +54,27 @@ export default function ProviderForm({
       ...prev,
       [field]: value || undefined // 将空字符串转换为 undefined
     }));
+  };
+
+  // 处理认证类型切换
+  const handleAuthTypeChange = (newType: 'auth_token' | 'api_key') => {
+    setAuthType(newType);
+    // 清空另一种认证方式的值
+    if (newType === 'auth_token') {
+      handleInputChange('api_key', '');
+    } else {
+      handleInputChange('auth_token', '');
+    }
+  };
+
+  // 获取当前认证值
+  const getCurrentAuthValue = () => {
+    return authType === 'auth_token' ? formData.auth_token || '' : formData.api_key || '';
+  };
+
+  // 设置当前认证值
+  const setCurrentAuthValue = (value: string) => {
+    handleInputChange(authType, value);
   };
 
   const validateForm = (): string | null => {
@@ -171,98 +201,107 @@ export default function ProviderForm({
                 </span>
               </h3>
               
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="auth_token">Auth Token</Label>
-                  <div className="relative">
-                    <Input
-                      id="auth_token"
-                      type={showTokens ? "text" : "password"}
-                      value={formData.auth_token || ''}
-                      onChange={(e) => handleInputChange('auth_token', e.target.value)}
-                      placeholder="sk-ant-..."
-                      disabled={loading}
-                      className="pr-12 [&::-webkit-credentials-auto-fill-button]:!hidden [&::-ms-reveal]:!hidden"
-                      autoComplete="new-password"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-1 top-1 h-8 w-10 p-0 bg-transparent hover:bg-muted/20"
-                      onClick={() => setShowTokens(!showTokens)}
-                    >
-                      {showTokens ? (
-                        <EyeOff className="h-3 w-3" />
-                      ) : (
-                        <Eye className="h-3 w-3" />
-                      )}
-                    </Button>
+              <Tabs value={authType} onValueChange={(value) => handleAuthTypeChange(value as 'auth_token' | 'api_key')} className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="auth_token">Auth Token</TabsTrigger>
+                  <TabsTrigger value="api_key">API Key</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="auth_token" className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="auth_token">Auth Token *</Label>
+                    <div className="relative">
+                      <Input
+                        id="auth_token"
+                        type={showTokens ? "text" : "password"}
+                        value={formData.auth_token || ''}
+                        onChange={(e) => handleInputChange('auth_token', e.target.value)}
+                        placeholder="sk-ant-..."
+                        disabled={loading}
+                        className="pr-12 [&::-webkit-credentials-auto-fill-button]:!hidden [&::-ms-reveal]:!hidden"
+                        autoComplete="new-password"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-1 top-1 h-8 w-10 p-0 bg-transparent hover:bg-muted/20"
+                        onClick={() => setShowTokens(!showTokens)}
+                      >
+                        {showTokens ? (
+                          <EyeOff className="h-3 w-3" />
+                        ) : (
+                          <Eye className="h-3 w-3" />
+                        )}
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      对应 ANTHROPIC_AUTH_TOKEN 环境变量
+                    </p>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    对应 ANTHROPIC_AUTH_TOKEN 环境变量
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="api_key">API Key</Label>
-                  <div className="relative">
-                    <Input
-                      id="api_key"
-                      type={showTokens ? "text" : "password"}
-                      value={formData.api_key || ''}
-                      onChange={(e) => handleInputChange('api_key', e.target.value)}
-                      placeholder="sk-ant-..."
-                      disabled={loading}
-                      className="pr-12 [&::-webkit-credentials-auto-fill-button]:!hidden [&::-ms-reveal]:!hidden"
-                      autoComplete="new-password"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-1 top-1 h-8 w-10 p-0 bg-transparent hover:bg-muted/20"
-                      onClick={() => setShowTokens(!showTokens)}
-                    >
-                      {showTokens ? (
-                        <EyeOff className="h-3 w-3" />
-                      ) : (
-                        <Eye className="h-3 w-3" />
-                      )}
-                    </Button>
+                </TabsContent>
+                
+                <TabsContent value="api_key" className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="api_key">API Key *</Label>
+                    <div className="relative">
+                      <Input
+                        id="api_key"
+                        type={showTokens ? "text" : "password"}
+                        value={formData.api_key || ''}
+                        onChange={(e) => handleInputChange('api_key', e.target.value)}
+                        placeholder="sk-ant-..."
+                        disabled={loading}
+                        className="pr-12 [&::-webkit-credentials-auto-fill-button]:!hidden [&::-ms-reveal]:!hidden"
+                        autoComplete="new-password"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-1 top-1 h-8 w-10 p-0 bg-transparent hover:bg-muted/20"
+                        onClick={() => setShowTokens(!showTokens)}
+                      >
+                        {showTokens ? (
+                          <EyeOff className="h-3 w-3" />
+                        ) : (
+                          <Eye className="h-3 w-3" />
+                        )}
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      对应 ANTHROPIC_API_KEY 环境变量
+                    </p>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    对应 ANTHROPIC_API_KEY 环境变量
-                  </p>
-                </div>
+                </TabsContent>
+              </Tabs>
 
-                <div className="space-y-2">
-                  <Label htmlFor="model">模型名称</Label>
-                  <Input
-                    id="model"
-                    value={formData.model || ''}
-                    onChange={(e) => handleInputChange('model', e.target.value)}
-                    placeholder="claude-3-5-sonnet-20241022 (可选)"
-                    disabled={loading}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    部分代理商需要指定特定的模型名称
-                  </p>
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="model">模型名称</Label>
+                <Input
+                  id="model"
+                  value={formData.model || ''}
+                  onChange={(e) => handleInputChange('model', e.target.value)}
+                  placeholder="claude-3-5-sonnet-20241022 (可选)"
+                  disabled={loading}
+                />
+                <p className="text-xs text-muted-foreground">
+                  部分代理商需要指定特定的模型名称
+                </p>
+              </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="small_fast_model">Haiku 类模型名称</Label>
-                  <Input
-                    id="small_fast_model"
-                    value={formData.small_fast_model || ''}
-                    onChange={(e) => handleInputChange('small_fast_model', e.target.value)}
-                    placeholder="claude-3-5-haiku-20241022 (可选)"
-                    disabled={loading}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    对应 ANTHROPIC_SMALL_FAST_MODEL 环境变量
-                  </p>
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="small_fast_model">Haiku 类模型名称</Label>
+                <Input
+                  id="small_fast_model"
+                  value={formData.small_fast_model || ''}
+                  onChange={(e) => handleInputChange('small_fast_model', e.target.value)}
+                  placeholder="claude-3-5-haiku-20241022 (可选)"
+                  disabled={loading}
+                />
+                <p className="text-xs text-muted-foreground">
+                  对应 ANTHROPIC_SMALL_FAST_MODEL 环境变量
+                </p>
               </div>
             </div>
           </Card>
