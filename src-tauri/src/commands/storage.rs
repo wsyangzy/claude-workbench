@@ -450,6 +450,12 @@ pub async fn storage_reset_database(app: AppHandle) -> Result<(), String> {
         conn.execute("DROP TABLE IF EXISTS app_settings", [])
             .map_err(|e| format!("Failed to drop app_settings table: {}", e))?;
         
+        // Drop relay station tables
+        conn.execute("DROP TABLE IF EXISTS relay_station_tokens", [])
+            .map_err(|e| format!("Failed to drop relay_station_tokens table: {}", e))?;
+        conn.execute("DROP TABLE IF EXISTS relay_stations", [])
+            .map_err(|e| format!("Failed to drop relay_stations table: {}", e))?;
+        
         // Re-enable foreign key constraints
         conn.execute("PRAGMA foreign_keys = ON", [])
             .map_err(|e| format!("Failed to re-enable foreign keys: {}", e))?;
@@ -466,6 +472,31 @@ pub async fn storage_reset_database(app: AppHandle) -> Result<(), String> {
         let mut conn_guard = db_state.0.lock()
             .map_err(|e| e.to_string())?;
         *conn_guard = new_conn;
+    }
+    
+    // Re-initialize the relay station manager with the new database
+    {
+        use crate::commands::relay_stations::RelayStationManager;
+        use std::sync::{Arc, Mutex};
+        
+        let db_path = app
+            .path()
+            .app_data_dir()
+            .unwrap()
+            .join("agents.db");
+        
+        let relay_conn = rusqlite::Connection::open(&db_path)
+            .map_err(|e| format!("Failed to open agents database for relay station manager: {}", e))?;
+        
+        let relay_manager = RelayStationManager::new(Arc::new(Mutex::new(relay_conn)))
+            .map_err(|e| format!("Failed to re-initialize relay station manager: {}", e))?;
+        
+        // Update the managed relay station state
+        if let Some(relay_state) = app.try_state::<Mutex<Option<RelayStationManager>>>() {
+            let mut relay_guard = relay_state.lock()
+                .map_err(|e| e.to_string())?;
+            *relay_guard = Some(relay_manager);
+        }
     }
     
     // Run VACUUM to optimize the database

@@ -481,7 +481,7 @@ export const Settings: React.FC<SettingsProps> = ({
               <TabsTrigger value="hooks">{t('common.hooks')}</TabsTrigger>
               <TabsTrigger value="commands">{t('common.commands')}</TabsTrigger>
               <TabsTrigger value="provider">{t('common.provider')}</TabsTrigger>
-              <TabsTrigger value="relay-station">中转站管理</TabsTrigger>
+              <TabsTrigger value="relay-station">{t('common.relayStation')}</TabsTrigger>
               <TabsTrigger value="storage">{t('settings.storage')}</TabsTrigger>
               <TabsTrigger value="about">{t('common.about')}</TabsTrigger>
             </TabsList>

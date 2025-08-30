@@ -448,6 +448,7 @@
     "advanced": "高级",
     "hooks": "钩子",
     "provider": "代理商",
+    "relayStation": "中转站",
     "addRule": "添加规则",
     "noDenyRulesConfigured": "未配置拒绝规则。",
     "bashExampleDeny": "例如，Bash(curl:*)",

@@ -487,6 +487,7 @@
     "hooks": "Hooks",
     "commands": "Commands",
     "provider": "Provider",
+    "relayStation": "Relay Station",
     "addRule": "Add Rule",
     "noDenyRulesConfigured": "No deny rules configured.",
     "bashExampleDeny": "e.g., Bash(curl:*)",

@@ -83,15 +83,15 @@ fn main() {
             let conn = init_database(&app.handle()).expect("Failed to initialize agents database");
             app.manage(AgentDb(Mutex::new(conn)));
 
-            // Initialize relay station manager with shared database
+            // Initialize relay station manager with shared agents database
             let db_path = app.handle()
                 .path()
                 .app_data_dir()
                 .unwrap()
-                .join("database.db");
+                .join("agents.db");
             
             let relay_conn = rusqlite::Connection::open(&db_path)
-                .expect("Failed to open database for relay station manager");
+                .expect("Failed to open agents database for relay station manager");
             
             let relay_manager = RelayStationManager::new(std::sync::Arc::new(Mutex::new(relay_conn)))
                 .expect("Failed to initialize relay station manager");
