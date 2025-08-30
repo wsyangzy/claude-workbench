@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface UsageDashboardProps {
   /**
@@ -43,7 +44,7 @@ interface TooltipPortalProps {
 // Memoized Portal Tooltip Component - renders outside main component tree
 const TooltipPortal = React.memo<TooltipPortalProps>(({ data, position, formatCurrency, formatTokens }) => {
   if (!data) return null;
-
+  const { t } = useTranslation();
   const date = new Date(data.date.replace(/-/g, '/'));
   const formattedDate = date.toLocaleDateString('en-US', {
     weekday: 'short',
@@ -102,13 +103,13 @@ const TooltipPortal = React.memo<TooltipPortalProps>(({ data, position, formatCu
       <div className="bg-background border border-border rounded-lg shadow-lg p-3 whitespace-nowrap" style={{ width: `${TOOLTIP_WIDTH}px` }}>
         <p className="text-sm font-semibold">{formattedDate}</p>
         <p className="text-sm text-muted-foreground mt-1">
-          成本： {formatCurrency(data.total_cost)}
+          {t('common.costLabel')} {formatCurrency(data.total_cost)}
         </p>
         <p className="text-xs text-muted-foreground">
-          {formatTokens(data.total_tokens)} 个令牌
+          {formatTokens(data.total_tokens)} {t('common.tokensUsed')}
         </p>
         <p className="text-xs text-muted-foreground">
-          {data.models_used.length} 个模型
+          {data.models_used.length} {t('common.modelsUsed')}
         </p>
       </div>
     </div>,
@@ -125,6 +126,7 @@ TooltipPortal.displayName = "TooltipPortal";
  * <UsageDashboard onBack={() => setView('welcome')} />
  */
 export const UsageDashboard: React.FC<UsageDashboardProps> = ({ onBack }) => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState<UsageStats | null>(null);
@@ -188,7 +190,7 @@ export const UsageDashboard: React.FC<UsageDashboardProps> = ({ onBack }) => {
       setApiBaseUrlStats(apiBaseUrlData);
     } catch (err) {
       console.error("Failed to load usage stats:", err);
-      setError("加载使用统计数据失败。请重试。");
+      setError(t('common.loadUsageStatsFailed'));
     } finally {
       setLoading(false);
     }
@@ -286,9 +288,9 @@ export const UsageDashboard: React.FC<UsageDashboardProps> = ({ onBack }) => {
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <div>
-              <h1 className="text-lg font-semibold">使用情况仪表盘</h1>
+              <h1 className="text-lg font-semibold">{t('common.usageDashboard')}</h1>
               <p className="text-xs text-muted-foreground">
-                追踪您的 Claude Code 使用情况和成本
+                {t('common.trackUsageAndCosts')}
               </p>
             </div>
           </div>
@@ -305,7 +307,7 @@ export const UsageDashboard: React.FC<UsageDashboardProps> = ({ onBack }) => {
                   onClick={() => setSelectedDateRange(range)}
                   className="text-xs"
                 >
-                  {range === "all" ? "所有时间" : range === "7d" ? "近 7 天" : range === "30d" ? "近 30 天" : "今天"}
+                  {range === "all" ? t('common.allTime') : range === "7d" ? t('common.last7Days') : range === "30d" ? t('common.last30Days') : t('common.today')}
                 </Button>
               ))}
             </div>
@@ -319,7 +321,7 @@ export const UsageDashboard: React.FC<UsageDashboardProps> = ({ onBack }) => {
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground mx-auto mb-4" />
-              <p className="text-sm text-muted-foreground">正在加载使用统计数据...</p>
+              <p className="text-sm text-muted-foreground">{t('common.loadingUsageStats')}</p>
             </div>
           </div>
         ) : error ? (
@@ -327,7 +329,7 @@ export const UsageDashboard: React.FC<UsageDashboardProps> = ({ onBack }) => {
             <div className="text-center max-w-md">
               <p className="text-sm text-destructive mb-4">{error}</p>
               <Button onClick={loadUsageStats} size="sm">
-                重试
+                {t('common.retry')}
               </Button>
             </div>
           </div>
@@ -344,7 +346,7 @@ export const UsageDashboard: React.FC<UsageDashboardProps> = ({ onBack }) => {
               <Card className="p-4 shimmer-hover">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs text-muted-foreground">总成本</p>
+                    <p className="text-xs text-muted-foreground">{t('common.totalCost')}</p>
                     <p className="text-2xl font-bold mt-1">
                       {formatCurrency(stats.total_cost)}
                     </p>
@@ -357,7 +359,7 @@ export const UsageDashboard: React.FC<UsageDashboardProps> = ({ onBack }) => {
               <Card className="p-4 shimmer-hover">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs text-muted-foreground">总会话</p>
+                    <p className="text-xs text-muted-foreground">{t('common.totalSessions')}</p>
                     <p className="text-2xl font-bold mt-1">
                       {formatNumber(stats.total_sessions)}
                     </p>
@@ -370,7 +372,7 @@ export const UsageDashboard: React.FC<UsageDashboardProps> = ({ onBack }) => {
               <Card className="p-4 shimmer-hover">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs text-muted-foreground">总令牌</p>
+                    <p className="text-xs text-muted-foreground">{t('common.totalTokens')}</p>
                     <p className="text-2xl font-bold mt-1">
                       {formatTokens(stats.total_tokens)}
                     </p>
@@ -383,7 +385,7 @@ export const UsageDashboard: React.FC<UsageDashboardProps> = ({ onBack }) => {
               <Card className="p-4 shimmer-hover">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs text-muted-foreground">平均每会话成本</p>
+                    <p className="text-xs text-muted-foreground">{t('common.averagePerSessionCost')}</p>
                     <p className="text-2xl font-bold mt-1">
                       {formatCurrency(
                         stats.total_sessions > 0 
@@ -400,33 +402,33 @@ export const UsageDashboard: React.FC<UsageDashboardProps> = ({ onBack }) => {
             {/* Tabs for different views */}
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="grid w-full grid-cols-6">
-                <TabsTrigger value="overview">概览</TabsTrigger>
-                <TabsTrigger value="models">按模型</TabsTrigger>
-                <TabsTrigger value="projects">按项目</TabsTrigger>
-                <TabsTrigger value="sessions">按会话</TabsTrigger>
-                <TabsTrigger value="api-base-url">按API地址</TabsTrigger>
-                <TabsTrigger value="timeline">时间线</TabsTrigger>
+                <TabsTrigger value="overview">{t('common.overview')}</TabsTrigger>
+                <TabsTrigger value="models">{t('common.byModel')}</TabsTrigger>
+                <TabsTrigger value="projects">{t('common.byProject')}</TabsTrigger>
+                <TabsTrigger value="sessions">{t('common.bySessions')}</TabsTrigger>
+                <TabsTrigger value="api-base-url">{t('common.byApiBaseUrl')}</TabsTrigger>
+                <TabsTrigger value="timeline">{t('common.timeline')}</TabsTrigger>
               </TabsList>
 
               {/* Overview Tab */}
               <TabsContent value="overview" className="space-y-4">
                 <Card className="p-6">
-                  <h3 className="text-sm font-semibold mb-4">令牌明细</h3>
+                  <h3 className="text-sm font-semibold mb-4">{t('common.tokenBreakdown')}</h3>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div>
-                      <p className="text-xs text-muted-foreground">输入令牌</p>
+                      <p className="text-xs text-muted-foreground">{t('common.inputTokens')}</p>
                       <p className="text-lg font-semibold">{formatTokens(stats.total_input_tokens)}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground">输出令牌</p>
+                      <p className="text-xs text-muted-foreground">{t('common.outputTokens')}</p>
                       <p className="text-lg font-semibold">{formatTokens(stats.total_output_tokens)}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground">缓存写入</p>
+                      <p className="text-xs text-muted-foreground">{t('common.cacheWrites')}</p>
                       <p className="text-lg font-semibold">{formatTokens(stats.total_cache_creation_tokens)}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground">缓存读取</p>
+                      <p className="text-xs text-muted-foreground">{t('common.cacheReads')}</p>
                       <p className="text-lg font-semibold">{formatTokens(stats.total_cache_read_tokens)}</p>
                     </div>
                   </div>
@@ -435,7 +437,7 @@ export const UsageDashboard: React.FC<UsageDashboardProps> = ({ onBack }) => {
                 {/* Quick Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Card className="p-6">
-                    <h3 className="text-sm font-semibold mb-4">最常用模型</h3>
+                    <h3 className="text-sm font-semibold mb-4">{t('common.mostUsedModels')}</h3>
                     <div className="space-y-3">
                       {stats.by_model.slice(0, 3).map((model) => (
                         <div key={model.model} className="flex items-center justify-between">
@@ -444,7 +446,7 @@ export const UsageDashboard: React.FC<UsageDashboardProps> = ({ onBack }) => {
                               {getModelDisplayName(model.model)}
                             </Badge>
                             <span className="text-xs text-muted-foreground">
-                              {model.session_count} 个会话
+                              {model.session_count} {t('common.sessions')}
                             </span>
                           </div>
                           <span className="text-sm font-medium">
@@ -456,7 +458,7 @@ export const UsageDashboard: React.FC<UsageDashboardProps> = ({ onBack }) => {
                   </Card>
 
                   <Card className="p-6">
-                    <h3 className="text-sm font-semibold mb-4">热门项目</h3>
+                    <h3 className="text-sm font-semibold mb-4">{t('common.topProjects')}</h3>
                     <div className="space-y-3">
                       {stats.by_project.slice(0, 3).map((project) => (
                         <div key={project.project_path} className="flex items-center justify-between gap-4">
@@ -465,7 +467,7 @@ export const UsageDashboard: React.FC<UsageDashboardProps> = ({ onBack }) => {
                               {project.project_path}
                             </span>
                             <span className="text-xs text-muted-foreground">
-                              {project.session_count} 个会话
+                              {project.session_count} {t('common.sessions')}
                             </span>
                           </div>
                           <span className="text-sm font-medium flex-shrink-0">
@@ -481,7 +483,7 @@ export const UsageDashboard: React.FC<UsageDashboardProps> = ({ onBack }) => {
               {/* Models Tab */}
               <TabsContent value="models">
                 <Card className="p-6">
-                  <h3 className="text-sm font-semibold mb-4">按模型使用情况</h3>
+                  <h3 className="text-sm font-semibold mb-4">{t('common.usageByModel')}</h3>
                   <div className="space-y-4">
                     {stats.by_model.map((model) => (
                       <div key={model.model} className="space-y-2">
@@ -494,7 +496,7 @@ export const UsageDashboard: React.FC<UsageDashboardProps> = ({ onBack }) => {
                               {getModelDisplayName(model.model)}
                             </Badge>
                             <span className="text-sm text-muted-foreground">
-                              {model.session_count} 个会话
+                              {model.session_count} {t('common.sessions')}
                             </span>
                           </div>
                           <span className="text-sm font-semibold">
@@ -503,19 +505,19 @@ export const UsageDashboard: React.FC<UsageDashboardProps> = ({ onBack }) => {
                         </div>
                         <div className="grid grid-cols-4 gap-2 text-xs">
                           <div>
-                            <span className="text-muted-foreground">输入： </span>
+                            <span className="text-muted-foreground">{t('common.input')} </span>
                             <span className="font-medium">{formatTokens(model.input_tokens)}</span>
                           </div>
                           <div>
-                            <span className="text-muted-foreground">输出： </span>
+                            <span className="text-muted-foreground">{t('common.output')} </span>
                             <span className="font-medium">{formatTokens(model.output_tokens)}</span>
                           </div>
                           <div>
-                            <span className="text-muted-foreground">缓存写： </span>
+                            <span className="text-muted-foreground">{t('common.cacheWrite')} </span>
                             <span className="font-medium">{formatTokens(model.cache_creation_tokens)}</span>
                           </div>
                           <div>
-                            <span className="text-muted-foreground">缓存读： </span>
+                            <span className="text-muted-foreground">{t('common.cacheRead')} </span>
                             <span className="font-medium">{formatTokens(model.cache_read_tokens)}</span>
                           </div>
                         </div>
@@ -528,7 +530,7 @@ export const UsageDashboard: React.FC<UsageDashboardProps> = ({ onBack }) => {
               {/* Projects Tab */}
               <TabsContent value="projects">
                 <Card className="p-6">
-                  <h3 className="text-sm font-semibold mb-4">按项目使用情况</h3>
+                  <h3 className="text-sm font-semibold mb-4">{t('common.usageByProject')}</h3>
                   <div className="space-y-3">
                     {stats.by_project.map((project) => (
                       <div key={project.project_path} className="flex items-center justify-between py-2 border-b border-border last:border-0">
@@ -538,17 +540,17 @@ export const UsageDashboard: React.FC<UsageDashboardProps> = ({ onBack }) => {
                           </span>
                           <div className="flex items-center space-x-3 mt-1">
                             <span className="text-xs text-muted-foreground">
-                              {project.session_count} 个会话
+                              {project.session_count} {t('common.sessions')}
                             </span>
                             <span className="text-xs text-muted-foreground">
-                              {formatTokens(project.total_tokens)} 个令牌
+                              {formatTokens(project.total_tokens)} {t('common.tokensUsed')}
                             </span>
                           </div>
                         </div>
                         <div className="text-right">
                           <p className="text-sm font-semibold">{formatCurrency(project.total_cost)}</p>
                           <p className="text-xs text-muted-foreground">
-                            {formatCurrency(project.total_cost / project.session_count)}/会话
+                            {formatCurrency(project.total_cost / project.session_count)}{t('common.perSession')}
                           </p>
                         </div>
                       </div>
@@ -560,7 +562,7 @@ export const UsageDashboard: React.FC<UsageDashboardProps> = ({ onBack }) => {
               {/* Sessions Tab */}
               <TabsContent value="sessions">
                   <Card className="p-6">
-                      <h3 className="text-sm font-semibold mb-4">按会话使用情况</h3>
+                      <h3 className="text-sm font-semibold mb-4">{t('common.usageBySessions')}</h3>
                       <div className="space-y-3">
                           {sessionStats?.map((session) => (
                               <div key={`${session.project_path}-${session.project_name}`} className="flex items-center justify-between py-2 border-b border-border last:border-0 gap-4">
@@ -598,7 +600,7 @@ export const UsageDashboard: React.FC<UsageDashboardProps> = ({ onBack }) => {
               {/* API Base URL Tab */}
               <TabsContent value="api-base-url">
                 <Card className="p-6">
-                  <h3 className="text-sm font-semibold mb-4">按API地址使用情况</h3>
+                      <h3 className="text-sm font-semibold mb-4">{t('common.usageByApiBaseUrl')}</h3>
                   <div className="space-y-4">
                     {apiBaseUrlStats?.map((apiUrlStat) => (
                       <div key={apiUrlStat.api_base_url} className="space-y-2">
@@ -608,7 +610,7 @@ export const UsageDashboard: React.FC<UsageDashboardProps> = ({ onBack }) => {
                               {apiUrlStat.api_base_url}
                             </Badge>
                             <span className="text-sm text-muted-foreground">
-                              {apiUrlStat.session_count} 个会话
+                              {apiUrlStat.session_count} {t('common.sessions')}
                             </span>
                           </div>
                           <span className="text-sm font-semibold">
@@ -617,19 +619,19 @@ export const UsageDashboard: React.FC<UsageDashboardProps> = ({ onBack }) => {
                         </div>
                         <div className="grid grid-cols-4 gap-2 text-xs">
                           <div>
-                            <span className="text-muted-foreground">输入： </span>
+                            <span className="text-muted-foreground">{t('common.input')} </span>
                             <span className="font-medium">{formatTokens(apiUrlStat.input_tokens)}</span>
                           </div>
                           <div>
-                            <span className="text-muted-foreground">输出： </span>
+                            <span className="text-muted-foreground">{t('common.output')} </span>
                             <span className="font-medium">{formatTokens(apiUrlStat.output_tokens)}</span>
                           </div>
                           <div>
-                            <span className="text-muted-foreground">缓存写： </span>
+                            <span className="text-muted-foreground">{t('common.cacheWrite')} </span>
                             <span className="font-medium">{formatTokens(apiUrlStat.cache_creation_tokens)}</span>
                           </div>
                           <div>
-                            <span className="text-muted-foreground">缓存读： </span>
+                            <span className="text-muted-foreground">{t('common.cacheRead')} </span>
                             <span className="font-medium">{formatTokens(apiUrlStat.cache_read_tokens)}</span>
                           </div>
                         </div>
@@ -644,7 +646,7 @@ export const UsageDashboard: React.FC<UsageDashboardProps> = ({ onBack }) => {
                 <Card className="p-6">
                   <h3 className="text-sm font-semibold mb-6 flex items-center space-x-2">
                     <Calendar className="h-4 w-4" />
-                    <span>日常使用情况</span>
+                    <span>{t('common.dailyUsage')}</span>
                   </h3>
                   {chartData ? (
                     <div className="relative pl-8 pr-4">
@@ -696,12 +698,12 @@ export const UsageDashboard: React.FC<UsageDashboardProps> = ({ onBack }) => {
                       
                       {/* X-axis label */}
                       <div className="mt-6 text-center text-xs text-muted-foreground">
-                        日常使用情况随时间变化
+                        {t('common.dailyUsageOverTime')}
                       </div>
                     </div>
                   ) : (
                     <div className="text-center py-8 text-sm text-muted-foreground">
-                      所选时期内无使用数据
+                      {t('common.noUsageDataForPeriod')}
                     </div>
                   )}
                 </Card>

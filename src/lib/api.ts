@@ -488,6 +488,20 @@ export interface ImportServerResult {
 }
 
 /**
+ * Application information including version and database location
+ */
+export interface AppInfo {
+  /** Current application version */
+  version: string;
+  /** Path to the application database */
+  database_path: string;
+  /** Latest available version (if checked) */
+  latest_version?: string;
+  /** Whether an update is available */
+  update_available: boolean;
+}
+
+/**
  * API client for interacting with the Rust backend
  */
 export const api = {
@@ -2167,6 +2181,47 @@ export const api = {
       return await invoke<string>("enhance_prompt", { prompt, model, context });
     } catch (error) {
       console.error("Failed to enhance prompt:", error);
+      throw error;
+    }
+  },
+
+  // About / App Information methods
+
+  /**
+   * Gets the current application version
+   * @returns Promise resolving to version string
+   */
+  async getAppVersion(): Promise<string> {
+    try {
+      return await invoke<string>("get_app_version");
+    } catch (error) {
+      console.error("Failed to get app version:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Gets the database file path
+   * @returns Promise resolving to database path string
+   */
+  async getDatabasePath(): Promise<string> {
+    try {
+      return await invoke<string>("get_database_path");
+    } catch (error) {
+      console.error("Failed to get database path:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Gets comprehensive application information
+   * @returns Promise resolving to app info object
+   */
+  async getAppInfo(): Promise<AppInfo> {
+    try {
+      return await invoke<AppInfo>("get_app_info");
+    } catch (error) {
+      console.error("Failed to get app info:", error);
       throw error;
     }
   },

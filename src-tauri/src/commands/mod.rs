@@ -1,8 +1,9 @@
 pub mod agents;
+pub mod about;
 pub mod claude;
-pub mod mcp;
-pub mod usage;
-pub mod storage;
-pub mod slash_commands;
 pub mod clipboard;
+pub mod mcp;
 pub mod provider;
+pub mod slash_commands;
+pub mod storage;
+pub mod usage;

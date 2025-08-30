@@ -53,6 +53,9 @@ use commands::provider::{
     clear_provider_config, test_provider_connection, add_provider_config,
     update_provider_config, delete_provider_config, get_provider_config,
 };
+use commands::about::{
+    get_app_version, get_database_path, get_app_info, check_for_updates,
+};
 use process::ProcessRegistryState;
 use std::sync::Mutex;
 use tauri::Manager;
@@ -234,6 +237,12 @@ fn main() {
             update_provider_config,
             delete_provider_config,
             get_provider_config,
+            
+            // App Information
+            get_app_version,
+            get_database_path,
+            get_app_info,
+            check_for_updates,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
