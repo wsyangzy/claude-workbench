@@ -67,16 +67,6 @@ export default function ProviderForm({
     }
   };
 
-  // 获取当前认证值
-  const getCurrentAuthValue = () => {
-    return authType === 'auth_token' ? formData.auth_token || '' : formData.api_key || '';
-  };
-
-  // 设置当前认证值
-  const setCurrentAuthValue = (value: string) => {
-    handleInputChange(authType, value);
-  };
-
   const validateForm = (): string | null => {
     if (!formData.name.trim()) {
       return '请输入代理商名称';

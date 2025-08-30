@@ -4,6 +4,8 @@ pub mod claude;
 pub mod clipboard;
 pub mod mcp;
 pub mod provider;
+pub mod relay_adapters;
+pub mod relay_stations;
 pub mod slash_commands;
 pub mod storage;
 pub mod usage;

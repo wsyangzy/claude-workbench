@@ -502,6 +502,204 @@ export interface AppInfo {
 }
 
 /**
+ * Relay Station Interfaces
+ */
+
+export enum RelayStationAdapter {
+  Newapi = 'newapi',
+  Oneapi = 'oneapi', 
+  Yourapi = 'yourapi',
+  Custom = 'custom',
+}
+
+export enum AuthMethod {
+  BearerToken = 'bearer_token',
+  ApiKey = 'api_key',
+  Custom = 'custom',
+}
+
+export interface RelayStation {
+  id: string;
+  name: string;
+  description?: string;
+  api_url: string;
+  adapter: RelayStationAdapter;
+  auth_method: AuthMethod;
+  system_token: string;
+  user_id?: string;
+  adapter_config?: Record<string, any>;
+  enabled: boolean;
+  created_at: number;
+  updated_at: number;
+}
+
+export interface CreateRelayStationRequest {
+  name: string;
+  description?: string;
+  api_url: string;
+  adapter: RelayStationAdapter;
+  auth_method: AuthMethod;
+  system_token: string;
+  user_id?: string;
+  adapter_config?: Record<string, any>;
+  enabled: boolean;
+}
+
+export interface StationInfo {
+  name: string;
+  announcement?: string;
+  api_url: string;
+  version?: string;
+  metadata?: Record<string, any>;
+  quota_per_unit?: number;
+}
+
+export interface RelayStationToken {
+  id: string;
+  station_id: string;
+  name: string;
+  token: string;
+  user_id?: string;
+  enabled: boolean;
+  expires_at?: number;
+  group?: string;
+  remain_quota?: number;
+  unlimited_quota?: boolean;
+  metadata?: Record<string, any>;
+  created_at: number;
+}
+
+export interface UserInfo {
+  user_id: string;
+  username?: string;
+  email?: string;
+  balance_remaining?: number;
+  amount_used?: number;
+  request_count?: number;
+  status?: string;
+  metadata?: Record<string, any>;
+}
+
+export interface StationLogEntry {
+  id: string;
+  timestamp: number;
+  level: string;
+  message: string;
+  user_id?: string;
+  request_id?: string;
+  metadata?: Record<string, any>;
+  model_name?: string;
+  prompt_tokens?: number;
+  completion_tokens?: number;
+  quota?: number;
+  token_name?: string;
+  use_time?: number;
+  is_stream?: boolean;
+  channel?: number;
+  group?: string;
+}
+
+export interface LogPaginationResponse {
+  items: StationLogEntry[];
+  page: number;
+  page_size: number;
+  total: number;
+}
+
+export interface TokenPaginationResponse {
+  items: RelayStationToken[];
+  page: number;
+  page_size: number;
+  total: number;
+}
+
+export interface ConnectionTestResult {
+  success: boolean;
+  response_time?: number;
+  message: string;
+  error_details?: Record<string, any>;
+}
+
+export interface CreateTokenRequest {
+  name: string;
+  group?: string;
+  remain_quota?: number;
+  unlimited_quota?: boolean;
+  expires_at?: number;
+  metadata?: Record<string, any>;
+}
+
+export interface UpdateTokenRequest {
+  name?: string;
+  group?: string;
+  remain_quota?: number;
+  unlimited_quota?: boolean;
+  expires_at?: number;
+  enabled?: boolean;
+  metadata?: Record<string, any>;
+}
+
+export interface ApiEndpoint {
+  id: number;
+  route: string;
+  url: string;
+  description: string;
+  color: string;
+}
+
+export interface StationConfig {
+  station_id: string;
+  api_endpoint: string;
+  custom_endpoint?: string;
+  path?: string;
+  model?: string;
+  saved_settings?: Record<string, any>;
+  created_at: number;
+  updated_at: number;
+}
+
+export interface SaveStationConfigRequest {
+  station_id: string;
+  api_endpoint: string;
+  custom_endpoint?: string;
+  path?: string;
+  model?: string;
+}
+
+export interface ConfigUsageStatus {
+  station_id: string;
+  station_name: string;
+  base_url: string;
+  token: string;
+  is_active: boolean;
+  applied_at?: number;
+}
+
+export interface RelayStationExport {
+  version: number;
+  exported_at: number;
+  stations: RelayStationExportItem[];
+}
+
+export interface RelayStationExportItem {
+  name: string;
+  description?: string;
+  api_url: string;
+  adapter: RelayStationAdapter;
+  auth_method: AuthMethod;
+  system_token: string;
+  user_id?: string;
+  adapter_config?: Record<string, any>;
+  enabled: boolean;
+}
+
+export interface TokenGroup {
+  id: string;
+  name: string;
+  description?: string;
+}
+
+/**
  * API client for interacting with the Rust backend
  */
 export const api = {
@@ -2222,6 +2420,344 @@ export const api = {
       return await invoke<AppInfo>("get_app_info");
     } catch (error) {
       console.error("Failed to get app info:", error);
+      throw error;
+    }
+  },
+
+  // Relay Station Management methods
+
+  /**
+   * Lists all relay stations
+   * @returns Promise resolving to array of relay stations
+   */
+  async listRelayStations(): Promise<RelayStation[]> {
+    try {
+      return await invoke<RelayStation[]>("list_relay_stations");
+    } catch (error) {
+      console.error("Failed to list relay stations:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Gets a specific relay station by ID
+   * @param stationId - The ID of the station to get
+   * @returns Promise resolving to relay station or null
+   */
+  async getRelayStation(stationId: string): Promise<RelayStation | null> {
+    try {
+      return await invoke<RelayStation | null>("get_relay_station", { stationId });
+    } catch (error) {
+      console.error("Failed to get relay station:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Adds a new relay station
+   * @param request - The station creation request
+   * @returns Promise resolving to created station
+   */
+  async addRelayStation(request: CreateRelayStationRequest): Promise<RelayStation> {
+    try {
+      return await invoke<RelayStation>("add_relay_station", { request });
+    } catch (error) {
+      console.error("Failed to add relay station:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Updates an existing relay station
+   * @param stationId - The ID of the station to update
+   * @param request - The station update request
+   * @returns Promise resolving to updated station
+   */
+  async updateRelayStation(stationId: string, request: CreateRelayStationRequest): Promise<RelayStation> {
+    try {
+      return await invoke<RelayStation>("update_relay_station", { stationId, request });
+    } catch (error) {
+      console.error("Failed to update relay station:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Deletes a relay station
+   * @param stationId - The ID of the station to delete
+   * @returns Promise resolving to success message
+   */
+  async deleteRelayStation(stationId: string): Promise<string> {
+    try {
+      return await invoke<string>("delete_relay_station", { stationId });
+    } catch (error) {
+      console.error("Failed to delete relay station:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Gets station information from the relay station API
+   * @param stationId - The ID of the station
+   * @returns Promise resolving to station info
+   */
+  async getStationInfo(stationId: string): Promise<StationInfo> {
+    try {
+      return await invoke<StationInfo>("get_station_info", { stationId });
+    } catch (error) {
+      console.error("Failed to get station info:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Lists tokens for a relay station
+   * @param stationId - The ID of the station
+   * @param page - Page number (optional)
+   * @param size - Page size (optional)
+   * @returns Promise resolving to paginated token response
+   */
+  async listStationTokens(stationId: string, page?: number, size?: number): Promise<TokenPaginationResponse> {
+    try {
+      return await invoke<TokenPaginationResponse>("list_station_tokens", { stationId, page, size });
+    } catch (error) {
+      console.error("Failed to list station tokens:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Adds a new token to a relay station
+   * @param stationId - The ID of the station
+   * @param request - The token creation request
+   * @returns Promise resolving to created token
+   */
+  async addStationToken(stationId: string, request: CreateTokenRequest): Promise<RelayStationToken> {
+    try {
+      return await invoke<RelayStationToken>("add_station_token", { stationId, request });
+    } catch (error) {
+      console.error("Failed to add station token:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Updates an existing station token
+   * @param stationId - The ID of the station
+   * @param tokenId - The ID of the token to update
+   * @param request - The token update request
+   * @returns Promise resolving to updated token
+   */
+  async updateStationToken(stationId: string, tokenId: string, request: UpdateTokenRequest): Promise<RelayStationToken> {
+    try {
+      return await invoke<RelayStationToken>("update_station_token", { stationId, tokenId, request });
+    } catch (error) {
+      console.error("Failed to update station token:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Deletes a station token
+   * @param stationId - The ID of the station
+   * @param tokenId - The ID of the token to delete
+   * @returns Promise resolving to success message
+   */
+  async deleteStationToken(stationId: string, tokenId: string): Promise<string> {
+    try {
+      return await invoke<string>("delete_station_token", { stationId, tokenId });
+    } catch (error) {
+      console.error("Failed to delete station token:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Gets user information for a token
+   * @param stationId - The ID of the station
+   * @param tokenId - The ID of the token
+   * @returns Promise resolving to user info
+   */
+  async getTokenUserInfo(stationId: string, tokenId: string): Promise<UserInfo> {
+    try {
+      return await invoke<UserInfo>("get_token_user_info", { stationId, tokenId });
+    } catch (error) {
+      console.error("Failed to get token user info:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Gets logs from a relay station
+   * @param stationId - The ID of the station
+   * @param page - Page number (optional)
+   * @param pageSize - Page size (optional)
+   * @param filters - Optional filters
+   * @returns Promise resolving to paginated log response
+   */
+  async getStationLogs(stationId: string, page?: number, pageSize?: number, filters?: any): Promise<LogPaginationResponse> {
+    try {
+      return await invoke<LogPaginationResponse>("get_station_logs", { stationId, page, pageSize, filters });
+    } catch (error) {
+      console.error("Failed to get station logs:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Tests connection to a relay station
+   * @param stationId - The ID of the station
+   * @returns Promise resolving to connection test result
+   */
+  async testStationConnection(stationId: string): Promise<ConnectionTestResult> {
+    try {
+      return await invoke<ConnectionTestResult>("test_station_connection", { stationId });
+    } catch (error) {
+      console.error("Failed to test station connection:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Gets user groups from a relay station
+   * @param stationId - The ID of the station
+   * @returns Promise resolving to user groups data
+   */
+  async getStationUserGroups(stationId: string): Promise<any> {
+    try {
+      return await invoke<any>("api_user_self_groups", { stationId });
+    } catch (error) {
+      console.error("Failed to get station user groups:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Toggles a station token's enabled state
+   * @param stationId - The ID of the station
+   * @param tokenId - The ID of the token
+   * @param enabled - Whether to enable or disable the token
+   * @returns Promise resolving to updated token
+   */
+  async toggleStationToken(stationId: string, tokenId: string, enabled: boolean): Promise<RelayStationToken> {
+    try {
+      return await invoke<RelayStationToken>("toggle_station_token", { stationId, tokenId, enabled });
+    } catch (error) {
+      console.error("Failed to toggle station token:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Loads API endpoints from a relay station
+   * @param stationId - The ID of the station
+   * @returns Promise resolving to array of API endpoints
+   */
+  async loadStationApiEndpoints(stationId: string): Promise<ApiEndpoint[]> {
+    try {
+      return await invoke<ApiEndpoint[]>("load_station_api_endpoints", { stationId });
+    } catch (error) {
+      console.error("Failed to load station API endpoints:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Saves station configuration
+   * @param request - The station config save request
+   * @returns Promise resolving to saved config
+   */
+  async saveStationConfig(request: SaveStationConfigRequest): Promise<StationConfig> {
+    try {
+      return await invoke<StationConfig>("save_station_config", { request });
+    } catch (error) {
+      console.error("Failed to save station config:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Gets saved station configuration
+   * @param stationId - The ID of the station
+   * @returns Promise resolving to station config or null
+   */
+  async getStationConfig(stationId: string): Promise<StationConfig | null> {
+    try {
+      return await invoke<StationConfig | null>("get_station_config", { stationId });
+    } catch (error) {
+      console.error("Failed to get station config:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Gets configuration usage status
+   * @returns Promise resolving to array of config usage status
+   */
+  async getConfigUsageStatus(): Promise<ConfigUsageStatus[]> {
+    try {
+      return await invoke<ConfigUsageStatus[]>("get_config_usage_status");
+    } catch (error) {
+      console.error("Failed to get config usage status:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Records configuration usage
+   * @param stationId - The ID of the station
+   * @param baseUrl - The base URL used
+   * @param token - The token used
+   * @returns Promise resolving to success message
+   */
+  async recordConfigUsage(stationId: string, baseUrl: string, token: string): Promise<string> {
+    try {
+      return await invoke<string>("record_config_usage", { stationId, baseUrl, token });
+    } catch (error) {
+      console.error("Failed to record config usage:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Exports relay stations to JSON
+   * @param stationIds - Array of station IDs to export (optional - exports all if not provided)
+   * @returns Promise resolving to export data
+   */
+  async exportRelayStations(stationIds?: string[]): Promise<RelayStationExport> {
+    try {
+      return await invoke<RelayStationExport>("export_relay_stations", { stationIds });
+    } catch (error) {
+      console.error("Failed to export relay stations:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Imports relay stations from JSON
+   * @param exportData - The export data to import
+   * @param overwrite - Whether to overwrite existing stations with same names
+   * @returns Promise resolving to import result
+   */
+  async importRelayStations(exportData: RelayStationExport, overwrite?: boolean): Promise<{ imported: number; skipped: number; errors: string[] }> {
+    try {
+      return await invoke("import_relay_stations", { exportData, overwrite });
+    } catch (error) {
+      console.error("Failed to import relay stations:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Gets user token groups (placeholder implementation)
+   * @returns Promise resolving to array of token groups
+   */
+  async getUserTokenGroups(): Promise<TokenGroup[]> {
+    try {
+      // This is a placeholder - implement according to your needs
+      return [];
+    } catch (error) {
+      console.error("Failed to get user token groups:", error);
       throw error;
     }
   },

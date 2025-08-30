@@ -1000,6 +1000,11 @@
     "importStationFailed": "导入中转站失败",
     "fetchStationsFailed": "获取中转站列表失败",
     "deleteStationFailed": "删除中转站失败",
+    "currentApplyConfig":"当前应用的配置",
+    "relayStation":"中转站:",
+    "type":"类型:",
+    "source":"来源:",
+    "externalConfig":" 外部配置",
     "addStationDialog": {
       "title": "添加中转站",
       "description": "添加一个新的中转站配置"

@@ -33,6 +33,7 @@ import { LanguageSelector } from "./LanguageSelector";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useTheme } from "@/contexts/ThemeContext";
 import ProviderManager from "./ProviderManager";
+import { RelayStationManager } from "./RelayStationManager";
 
 interface SettingsProps {
   /**
@@ -480,6 +481,7 @@ export const Settings: React.FC<SettingsProps> = ({
               <TabsTrigger value="hooks">{t('common.hooks')}</TabsTrigger>
               <TabsTrigger value="commands">{t('common.commands')}</TabsTrigger>
               <TabsTrigger value="provider">{t('common.provider')}</TabsTrigger>
+              <TabsTrigger value="relay-station">中转站管理</TabsTrigger>
               <TabsTrigger value="storage">{t('settings.storage')}</TabsTrigger>
               <TabsTrigger value="about">{t('common.about')}</TabsTrigger>
             </TabsList>
@@ -981,6 +983,11 @@ export const Settings: React.FC<SettingsProps> = ({
             {/* Provider Tab */}
             <TabsContent value="provider">
               <ProviderManager onBack={() => {}} />
+            </TabsContent>
+            
+            {/* Relay Station Tab */}
+            <TabsContent value="relay-station">
+              <RelayStationManager onBack={() => {}} />
             </TabsContent>
             
             
