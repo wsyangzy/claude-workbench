@@ -2942,11 +2942,11 @@ const RelayStationManager: React.FC<RelayStationManagerProps> = ({ onBack }) => 
   }
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
+    <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between p-6 border-b">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="sm" onClick={onBack}>
+          <Button variant="ghost" size="icon" onClick={onBack} className="h-8 w-8">
             <Server className="h-4 w-4" />
           </Button>
           <div>
@@ -2957,197 +2957,180 @@ const RelayStationManager: React.FC<RelayStationManagerProps> = ({ onBack }) => 
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
+            size="sm"
             onClick={() => handleExportStations()}
             disabled={isExporting || stations.length === 0}
+            className="text-xs"
           >
             {isExporting ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              <Loader2 className="h-3 w-3 mr-1 animate-spin" />
             ) : (
-              <Download className="h-4 w-4 mr-2" />
+              <Download className="h-3 w-3 mr-1" />
             )}
             {t('relayStations.exportStation.button')}
           </Button>
           <Button
             variant="outline"
+            size="sm"
             onClick={handleImportStations}
             disabled={isImporting}
+            className="text-xs"
           >
             {isImporting ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              <Loader2 className="h-3 w-3 mr-1 animate-spin" />
             ) : (
-              <Upload className="h-4 w-4 mr-2" />
+              <Upload className="h-3 w-3 mr-1" />
             )}
             {t('relayStations.importStationDialog.title')}
           </Button>
-          <Button onClick={() => setShowAddDialog(true)}>
-            <Plus className="h-4 w-4 mr-2" />
+          <Button onClick={() => setShowAddDialog(true)} size="sm" className="text-xs">
+            <Plus className="h-3 w-3 mr-1" />
             {t('relayStations.addStationDialog.title')}
           </Button>
         </div>
       </div>
 
-      {/* Current Applied Configuration Status */}
-      {(() => {
-        const appliedConfig = getAppliedConfigInfo();
-        if (!appliedConfig) return null;
+      {/* Content */}
+      <div className="flex-1 overflow-auto p-6">
+        <div className="max-w-4xl mx-auto space-y-4">
 
-        return (
-          <Card className="bg-green-50 border-green-200 shadow-lg">
-            <div className="p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Shield className="h-4 w-4 text-green-600" />
-                <h4 className="text-sm font-medium text-green-800">{t('relayStations.currentApplyConfig')}</h4>
-              </div>
-              <div className="space-y-1 text-xs text-green-700">
-                {appliedConfig.station ? (
-                  <>
-                    <p><span className="font-medium">{t('relayStations.relayStation')}</span> {appliedConfig.station.name}</p>
-                    <p><span className="font-medium">{t('relayStations.type')}</span> {appliedConfig.station.adapter === 'custom' ? '自定义' : appliedConfig.station.adapter.toUpperCase()}</p>
-                  </>
-                ) : (
-                  <p><span className="font-medium">{t('relayStations.source')}</span>{t('relayStations.externalConfig')}</p>
-                )}
-                <p><span className="font-medium">Base URL:</span> {appliedConfig.baseUrl}</p>
-                {appliedConfig.partialKey && (
-                  <p><span className="font-medium">API Token:</span> {appliedConfig.partialKey}</p>
-                )}
-              </div>
-            </div>
-          </Card>
-        );
-      })()}
+          {/* Current Configuration Status - 只在有中转站时显示 */}
+          {stations.length > 0 && (() => {
+            const appliedConfig = getAppliedConfigInfo();
+            if (!appliedConfig) return null;
 
-      {/* Station List */}
-      {loading ? (
-        <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
-      ) : stations.length === 0 ? (
-        <Card className="text-center py-12">
-          <CardContent>
-            <Server className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">暂无中转站</h3>
-            <p className="text-muted-foreground mb-4">
-              添加您的第一个中转站以开始使用
-            </p>
-            <Button onClick={() => setShowAddDialog(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              添加中转站
-            </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-4">
-          {stations.map((station) => (
-            <Card key={station.id} className="hover:shadow-md transition-all duration-200">
-              <div className="flex items-center justify-between p-6">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="flex items-center gap-2">
-                      <Server className="h-5 w-5 text-muted-foreground" />
-                      <h3 className="text-lg font-semibold">{station.name}</h3>
-                    </div>
-                    <Badge variant="outline" className="text-xs">
-                      {station.adapter === 'custom' ? '自定义' : station.adapter.toUpperCase()}
-                    </Badge>
-                    {station.adapter === 'custom' && (
-                      <Badge variant="secondary" className="text-xs bg-blue-500/10 text-blue-600 border-blue-500/20">
-                        仅配置切换
-                      </Badge>
-                    )}
-                    {!station.enabled && (
-                      <Badge variant="destructive" className="text-xs">
-                        已禁用
-                      </Badge>
-                    )}
-                    {station.adapter === 'custom' && isCustomStationApplied(station) && (
-                      <Badge variant="default" className="text-xs bg-green-500/10 text-green-600 border-green-500/20">
-                        <Shield className="h-3 w-3 mr-1" />
-                        已应用
-                      </Badge>
-                    )}
+            return (
+              <div className="p-4 bg-muted/30 rounded-lg border">
+                <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
+                  <Shield className="h-4 w-4" />
+                  当前配置状态
+                </h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span className="text-green-700">
+                      正在使用: {appliedConfig.station ? appliedConfig.station.name : '外部配置'}
+                    </span>
                   </div>
                   
-                  <div className="space-y-1 text-sm text-muted-foreground">
-                    <p><span className="font-medium">描述: </span>{station.description || '无描述'}</p>
-                    <p><span className="font-medium">API地址: </span>{station.api_url}</p>
-                    {station.user_id && station.adapter !== 'custom' && (
-                      <p><span className="font-medium">用户ID: </span>{station.user_id}</p>
-                    )}
-                    {station.adapter === 'custom' && (
-                      <p className="text-xs text-blue-600 dark:text-blue-400">
-                        <span className="font-medium">说明: </span>此配置可直接应用为代理商设置，无需管理令牌和日志
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  {station.adapter === 'custom' && (
-                    <Button
-                      variant={isCustomStationApplied(station) ? "default" : "default"}
-                      size="sm"
-                      onClick={() => handleApplyStationFromList(station)}
-                      className={isCustomStationApplied(station) ? "bg-green-600 hover:bg-green-700 text-white" : "bg-green-600 hover:bg-green-700 text-white"}
-                    >
-                      {isCustomStationApplied(station) ? (
-                        <>
-                          <Shield className="h-4 w-4 mr-2" />
-                          重新配置
-                        </>
-                      ) : (
-                        <>
-                          <PlayCircle className="h-4 w-4 mr-2" />
-                          应用配置
-                        </>
-                      )}
-                    </Button>
+                  {appliedConfig.baseUrl && (
+                    <p className="text-muted-foreground">
+                      API地址: {appliedConfig.baseUrl}
+                    </p>
                   )}
                   
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEditStation(station)}
-                    title="编辑中转站"
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDeleteStation(station)}
-                    className="text-red-600 hover:text-red-700 hover:border-red-300"
-                    title="删除中转站"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                  
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleStationClick(station)}
-                  >
-                    查看详情
-                    <ChevronRight className="h-4 w-4 ml-2" />
-                  </Button>
+                  {appliedConfig.station && (
+                    <p className="text-muted-foreground">
+                      类型: {appliedConfig.station.adapter === 'custom' ? '自定义' : appliedConfig.station.adapter.toUpperCase()}
+                    </p>
+                  )}
                 </div>
               </div>
-            </Card>
-          ))}
-        </div>
-      )}
+            );
+          })()}
 
-      {/* Add Station Dialog */}
-      <AddStationDialog
-        open={showAddDialog}
-        onOpenChange={setShowAddDialog}
-        onStationAdded={() => {
-          loadStations();
-          setShowAddDialog(false);
-        }}
+          {/* Station List */}
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground mx-auto mb-4" />
+                <p className="text-sm text-muted-foreground">正在加载中转站...</p>
+              </div>
+            </div>
+          ) : stations.length === 0 ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <Server className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-sm text-muted-foreground mb-4">还没有配置任何中转站</p>
+                <Button onClick={() => setShowAddDialog(true)} size="sm">
+                  <Plus className="h-4 w-4 mr-2" />
+                  添加第一个中转站
+                </Button>
+              </div>
+            </div>
+          ) : (
+            stations.map((station) => (
+              <Card key={station.id} className="p-4 overflow-hidden">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="flex items-center gap-2">
+                        <Server className="h-4 w-4 text-muted-foreground" />
+                        <h3 className="font-medium">{station.name}</h3>
+                      </div>
+                      {(() => {
+                        const appliedConfig = getAppliedConfigInfo();
+                        const isApplied = appliedConfig?.station?.id === station.id;
+                        return isApplied ? (
+                          <Badge variant="secondary" className="text-xs">
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            当前使用
+                          </Badge>
+                        ) : null;
+                      })()}
+                    </div>
+                    
+                    <div className="space-y-1 text-sm text-muted-foreground">
+                      <p><span className="font-medium">描述：</span>{station.description || '无描述'}</p>
+                      <p><span className="font-medium">API地址：</span>{station.api_url}</p>
+                      <p><span className="font-medium">适配器：</span>{station.adapter === 'custom' ? '自定义' : station.adapter.toUpperCase()}</p>
+                      {station.user_id && (
+                        <p><span className="font-medium">用户ID：</span>{station.user_id}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleApplyStationFromList(station)}
+                      className="text-xs"
+                    >
+                      <PlayCircle className="h-3 w-3" />
+                    </Button>
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditStation(station)}
+                      className="text-xs"
+                    >
+                      <Edit className="h-3 w-3" />
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDeleteStation(station)}
+                      className="text-xs text-red-600 hover:text-red-700"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                    
+                    <Button
+                      size="sm"
+                      onClick={() => handleStationClick(station)}
+                      className="text-xs"
+                    >
+                      <ChevronRight className="h-3 w-3 mr-1" />
+                      查看详情
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            ))
+          )}
+        </div>
+      </div>
+
+      {/* Dialogs and Toasts */}
+      <AddStationDialog 
+        open={showAddDialog} 
+        onOpenChange={setShowAddDialog} 
+        onStationAdded={loadStations} 
       />
-      
+
       {/* Edit Station Dialog */}
       <AddStationDialog
         open={showEditDialog}

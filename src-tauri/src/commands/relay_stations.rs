@@ -345,6 +345,19 @@ impl RelayStationManager {
         conn.execute("CREATE INDEX IF NOT EXISTS idx_station_tokens_station_id ON relay_station_tokens(station_id)", [])?;
         conn.execute("CREATE INDEX IF NOT EXISTS idx_station_tokens_enabled ON relay_station_tokens(enabled)", [])?;
 
+        // Create config_usage table for tracking configuration usage
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS config_usage (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                station_id TEXT NOT NULL,
+                base_url TEXT NOT NULL,
+                token TEXT NOT NULL,
+                applied_at INTEGER NOT NULL,
+                UNIQUE(station_id)
+            )",
+            [],
+        )?;
+
         Ok(())
     }
 
@@ -747,19 +760,6 @@ impl RelayStationManager {
     pub fn record_config_usage(&self, station_id: &str, base_url: &str, token: &str) -> Result<()> {
         let conn = self.db.lock().unwrap();
         
-        // Create table if it doesn't exist
-        conn.execute(
-            "CREATE TABLE IF NOT EXISTS config_usage (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                station_id TEXT NOT NULL,
-                base_url TEXT NOT NULL,
-                token TEXT NOT NULL,
-                applied_at INTEGER NOT NULL,
-                UNIQUE(station_id)
-            )",
-            [],
-        )?;
-
         let now = Utc::now().timestamp();
         
         // Insert or replace usage record

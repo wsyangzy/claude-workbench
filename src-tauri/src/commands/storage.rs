@@ -455,6 +455,8 @@ pub async fn storage_reset_database(app: AppHandle) -> Result<(), String> {
             .map_err(|e| format!("Failed to drop relay_station_tokens table: {}", e))?;
         conn.execute("DROP TABLE IF EXISTS relay_stations", [])
             .map_err(|e| format!("Failed to drop relay_stations table: {}", e))?;
+        conn.execute("DROP TABLE IF EXISTS config_usage", [])
+            .map_err(|e| format!("Failed to drop config_usage table: {}", e))?;
         
         // Re-enable foreign key constraints
         conn.execute("PRAGMA foreign_keys = ON", [])
