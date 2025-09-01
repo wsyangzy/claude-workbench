@@ -271,7 +271,7 @@ export const MCPAddServer: React.FC<MCPAddServerProps> = ({
                   onClick={() => removeEnvVar(type, envVar.id)}
                   className="h-8 w-8 hover:text-destructive"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-4 w-4 hover:!text-red-600" />
                 </Button>
               </div>
             ))}

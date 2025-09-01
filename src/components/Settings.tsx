@@ -434,7 +434,7 @@ export const Settings: React.FC<SettingsProps> = ({
           onClick={saveSettings}
           disabled={saving || loading}
           size="sm"
-          className="gap-2 bg-primary hover:bg-primary/90"
+          className="gap-2 bg-primary hover:bg-primary/90 hover:!text-gray-400 dark:hover:!text-gray-300"
         >
           {saving ? (
             <>
@@ -507,16 +507,18 @@ export const Settings: React.FC<SettingsProps> = ({
                       </div>
                       <div className="flex items-center gap-2">
                         <Button
-                          variant={theme === 'light' ? 'default' : 'outline'}
+                          variant={theme === 'light' ? 'outline' : 'default'}
                           size="sm"
                           onClick={() => setTheme('light')}
+                          className="hover:!text-gray-400 dark:hover:!text-gray-300"
                         >
                           {t('settings.themeLight')}
                         </Button>
                         <Button
-                          variant={theme === 'dark' ? 'default' : 'outline'}
+                          variant={theme === 'dark' ? 'outline' : 'default'}
                           size="sm"
                           onClick={() => setTheme('dark')}
+                          className="hover:!text-gray-400 dark:hover:!text-gray-300"
                         >
                           {t('settings.themeDark')}
                         </Button>
@@ -629,6 +631,7 @@ export const Settings: React.FC<SettingsProps> = ({
                               setCustomPathError(null);
                               setCustomClaudePath("");
                             }}
+                            className={!isCustomPathMode ? "hover:!text-gray-400 dark:hover:!text-gray-300" : "hover:!text-red-600"}
                           >
                             {isCustomPathMode ? t('common.cancel') : t('common.setCustomPath')}
                           </Button>
@@ -662,6 +665,7 @@ export const Settings: React.FC<SettingsProps> = ({
                                   size="sm"
                                   onClick={handleSetCustomPath}
                                   disabled={!customClaudePath.trim()}
+                                  className="hover:!text-gray-400 dark:hover:!text-gray-300"
                                 >
                                   {t('common.setPath')}
                                 </Button>
@@ -669,6 +673,7 @@ export const Settings: React.FC<SettingsProps> = ({
                                   variant="outline"
                                   size="sm"
                                   onClick={handleClearCustomPath}
+                                  className="hover:!text-gray-400 dark:hover:!text-gray-300"
                                 >
                                   {t('common.revertToAutoDetection')}
                                 </Button>
@@ -747,7 +752,7 @@ export const Settings: React.FC<SettingsProps> = ({
                               onClick={() => removePermissionRule("allow", rule.id)}
                               className="h-8 w-8"
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className="h-4 w-4 hover:!text-red-600" />
                             </Button>
                           </motion.div>
                         ))
@@ -794,7 +799,7 @@ export const Settings: React.FC<SettingsProps> = ({
                               onClick={() => removePermissionRule("deny", rule.id)}
                               className="h-8 w-8"
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className="h-4 w-4 hover:!text-red-600" />
                             </Button>
                           </motion.div>
                         ))
@@ -833,7 +838,7 @@ export const Settings: React.FC<SettingsProps> = ({
                       variant="outline"
                       size="sm"
                       onClick={addEnvVar}
-                      className="gap-2"
+                      className="gap-2 hover:!text-gray-400 dark:hover:!text-gray-300"
                     >
                       <Plus className="h-3 w-3" />
                       {t('common.addVariable')}
@@ -888,7 +893,7 @@ export const Settings: React.FC<SettingsProps> = ({
                               onClick={() => removeEnvVar(envVar.id)}
                               className="h-8 w-8 hover:text-destructive"
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className="h-4 w-4 hover:!text-red-600" />
                             </Button>
                           </motion.div>
                         ))}

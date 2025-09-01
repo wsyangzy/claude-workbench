@@ -2305,12 +2305,20 @@ export const api = {
    * @returns Promise resolving to success message
    */
   async addProviderConfig(config: Omit<ProviderConfig, 'id'>): Promise<string> {
-    // Generate ID from name
-    const id = config.name
+    // Generate ID from name - handle Chinese characters properly
+    let id = config.name
       .toLowerCase()
-      .replace(/[^a-z0-9]/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '');
+      // Replace Chinese characters and special chars with hyphens, but keep alphanumeric
+      .replace(/[\u4e00-\u9fff]+/g, '-') // Replace Chinese characters
+      .replace(/[^a-z0-9-]/g, '-') // Replace other non-alphanumeric chars
+      .replace(/-+/g, '-') // Collapse multiple hyphens
+      .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+    
+    // Fallback: if ID is empty or too short, generate a timestamp-based ID
+    if (!id || id.length < 2) {
+      const timestamp = Date.now().toString(36);
+      id = `provider-${timestamp}`;
+    }
       
     const fullConfig: ProviderConfig = {
       ...config,

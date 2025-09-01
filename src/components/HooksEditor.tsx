@@ -574,7 +574,7 @@ export const HooksEditor: React.FC<HooksEditorProps> = ({
                 size="sm"
                 onClick={() => removeMatcher(event, matcher.id)}
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-4 w-4 hover:!text-red-600" />
               </Button>
             )}
           </div>
@@ -597,6 +597,7 @@ export const HooksEditor: React.FC<HooksEditorProps> = ({
                     variant="outline"
                     size="sm"
                     onClick={() => addCommand(event, matcher.id)}
+                    className="hover:!text-gray-400 dark:hover:!text-gray-300"
                   >
                     <Plus className="h-3 w-3 mr-1" />
                     {t('common.addCommand')}
@@ -642,7 +643,7 @@ export const HooksEditor: React.FC<HooksEditorProps> = ({
                                 size="sm"
                                 onClick={() => removeCommand(event, matcher.id, hook.id)}
                               >
-                                <Trash2 className="h-4 w-4" />
+                                <Trash2 className="h-4 w-4 hover:!text-red-600" />
                               </Button>
                             )}
                           </div>
@@ -708,7 +709,7 @@ export const HooksEditor: React.FC<HooksEditorProps> = ({
                 size="sm"
                 onClick={() => removeDirectCommand(event, command.id)}
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-4 w-4 hover:!text-red-600" />
               </Button>
             )}
           </div>
@@ -767,6 +768,7 @@ export const HooksEditor: React.FC<HooksEditorProps> = ({
                       variant="outline"
                       size="sm"
                       onClick={() => setShowTemplateDialog(true)}
+                      className="hover:!text-gray-400 dark:hover:!text-gray-300"
                     >
                       <FileText className="h-4 w-4 mr-2" />
                       {t('common.templates')}
@@ -863,7 +865,10 @@ export const HooksEditor: React.FC<HooksEditorProps> = ({
                     <Card className="p-8 text-center">
                       <p className="text-muted-foreground mb-4">{t('common.noHooksConfigured')}</p>
                       {!readOnly && (
-                        <Button onClick={() => isMatcherEvent ? addMatcher(event) : addDirectCommand(event)}>
+                        <Button
+                          onClick={() => isMatcherEvent ? addMatcher(event) : addDirectCommand(event)}
+                          className='hover:!text-gray-400 dark:hover:!text-gray-300'
+                        >
                           <Plus className="h-4 w-4 mr-2" />
                           {t('common.addHook')}
                         </Button>
@@ -880,7 +885,7 @@ export const HooksEditor: React.FC<HooksEditorProps> = ({
                         <Button
                           variant="outline"
                           onClick={() => isMatcherEvent ? addMatcher(event) : addDirectCommand(event)}
-                          className="w-full"
+                          className="w-full hover:!text-gray-400 dark:hover:!text-gray-300"
                         >
                           <Plus className="h-4 w-4 mr-2" />
                           {t('common.addAnother')} {isMatcherEvent ? t('common.matcher') : t('common.command')}

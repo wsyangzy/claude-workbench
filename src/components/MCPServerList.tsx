@@ -256,7 +256,7 @@ export const MCPServerList: React.FC<MCPServerListProps> = ({
                 {removingServer === server.name ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-4 w-4 hover:!text-red-600" />
                 )}
               </Button>
             </div>

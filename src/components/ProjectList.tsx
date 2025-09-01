@@ -208,7 +208,7 @@ export const ProjectList: React.FC<ProjectListProps> = ({
                               }}
                               className="text-destructive hover:text-destructive"
                             >
-                              <Trash2 className="h-4 w-4 mr-2" />
+                              <Trash2 className="h-4 w-4 mr-2 hover:!text-red-600" />
                               删除项目
                             </DropdownMenuItem>
                           )}

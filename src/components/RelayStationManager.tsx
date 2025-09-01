@@ -2960,7 +2960,7 @@ const RelayStationManager: React.FC<RelayStationManagerProps> = ({ onBack }) => 
             size="sm"
             onClick={() => handleExportStations()}
             disabled={isExporting || stations.length === 0}
-            className="text-xs"
+            className="text-xs hover:!text-gray-400 dark:hover:!text-gray-300"
           >
             {isExporting ? (
               <Loader2 className="h-3 w-3 mr-1 animate-spin" />
@@ -2974,7 +2974,7 @@ const RelayStationManager: React.FC<RelayStationManagerProps> = ({ onBack }) => 
             size="sm"
             onClick={handleImportStations}
             disabled={isImporting}
-            className="text-xs"
+            className="text-xs hover:!text-gray-400 dark:hover:!text-gray-300"
           >
             {isImporting ? (
               <Loader2 className="h-3 w-3 mr-1 animate-spin" />
@@ -2983,7 +2983,12 @@ const RelayStationManager: React.FC<RelayStationManagerProps> = ({ onBack }) => 
             )}
             {t('relayStations.importStationDialog.title')}
           </Button>
-          <Button onClick={() => setShowAddDialog(true)} size="sm" className="text-xs">
+          <Button
+            variant="outline"
+            onClick={() => setShowAddDialog(true)}
+            size="sm"
+            className="text-xs hover:!text-gray-400 dark:hover:!text-gray-300"
+          >
             <Plus className="h-3 w-3 mr-1" />
             {t('relayStations.addStationDialog.title')}
           </Button>
@@ -3042,7 +3047,11 @@ const RelayStationManager: React.FC<RelayStationManagerProps> = ({ onBack }) => 
               <div className="text-center">
                 <Server className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <p className="text-sm text-muted-foreground mb-4">还没有配置任何中转站</p>
-                <Button onClick={() => setShowAddDialog(true)} size="sm">
+                  <Button
+                    onClick={() => setShowAddDialog(true)}
+                    size="sm"
+                    className="hover:!text-gray-400 dark:hover:!text-gray-300"
+                  >
                   <Plus className="h-4 w-4 mr-2" />
                   添加第一个中转站
                 </Button>

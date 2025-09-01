@@ -229,10 +229,10 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
 
         <div className="flex items-center gap-2">
           <Button
-            variant="default"
+            variant="outline"
             size="sm"
             onClick={handleAddProvider}
-            className="text-xs"
+            className="text-xs hover:!text-gray-400 dark:hover:!text-gray-300"
           >
             <Plus className="h-3 w-3 mr-1" />
             添加代理商
@@ -241,17 +241,17 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
             variant="outline"
             size="sm"
             onClick={() => setShowCurrentConfig(true)}
-            className="text-xs"
+            className="text-xs hover:!text-gray-400 dark:hover:!text-gray-300"
           >
             <Eye className="h-3 w-3 mr-1" />
             查看当前配置
           </Button>
           <Button
-            variant="destructive"
+            variant="outline"
             size="sm"
             onClick={clearProvider}
             disabled={switching === 'clear'}
-            className="text-xs"
+            className="hover:!text-red-600"
           >
             {switching === 'clear' ? (
               <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
@@ -309,7 +309,11 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
               <div className="text-center">
                 <Globe className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <p className="text-sm text-muted-foreground mb-4">还没有配置任何代理商</p>
-                <Button onClick={handleAddProvider} size="sm">
+                <Button
+                  onClick={handleAddProvider}
+                  size="sm"
+                  className="text-xs hover:!text-gray-400 dark:hover:!text-gray-300"
+                >
                   <Plus className="h-4 w-4 mr-2" />
                   添加第一个代理商
                 </Button>

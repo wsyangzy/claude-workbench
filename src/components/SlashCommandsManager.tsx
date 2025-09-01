@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { flushSync } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Plus, 
@@ -229,14 +230,20 @@ export const SlashCommandsManager: React.FC<SlashCommandsManagerProps> = ({
     });
   };
 
-  const handleToolToggle = (tool: string) => {
+  // 强制重新渲染的状态
+  const [forceRender, setForceRender] = useState(0);
+
+  const handleToolToggle = useCallback((tool: string) => {
     setCommandForm(prev => ({
       ...prev,
       allowedTools: prev.allowedTools.includes(tool)
         ? prev.allowedTools.filter(t => t !== tool)
         : [...prev.allowedTools, tool]
     }));
-  };
+    
+    // 强制立即重新渲染
+    setForceRender(prev => prev + 1);
+  }, []);
 
   const applyExample = (example: typeof EXAMPLE_COMMANDS[0]) => {
     setCommandForm(prev => ({
@@ -305,7 +312,7 @@ export const SlashCommandsManager: React.FC<SlashCommandsManagerProps> = ({
               : t('common.createCustomCommandsWorkflow')}
           </p>
         </div>
-        <Button onClick={handleCreateNew} size="sm" className="gap-2">
+        <Button onClick={handleCreateNew} size="sm" className="gap-2 hover:!text-gray-400 dark:hover:!text-gray-300">
           <Plus className="h-4 w-4" />
           {t('common.newCommand')}
         </Button>
@@ -463,7 +470,7 @@ export const SlashCommandsManager: React.FC<SlashCommandsManagerProps> = ({
                               onClick={() => handleDeleteClick(command)}
                               className="h-8 w-8 text-destructive hover:text-destructive"
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className="h-4 w-4 hover:!text-red-600" />
                             </Button>
                           </div>
                         </div>
@@ -497,14 +504,14 @@ export const SlashCommandsManager: React.FC<SlashCommandsManagerProps> = ({
 
       {/* Edit Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle>
               {editingCommand ? t('common.editCommand') : t('common.createNewCommand')}
             </DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-4 py-4">
+          <div className="space-y-4 py-4 overflow-y-auto flex-1">
             {/* Scope */}
             <div className="space-y-2">
               <Label>{t('common.scope')}</Label>
@@ -593,11 +600,12 @@ export const SlashCommandsManager: React.FC<SlashCommandsManagerProps> = ({
               <div className="flex flex-wrap gap-2">
                 {COMMON_TOOL_MATCHERS.map((tool) => (
                   <Button
-                    key={tool}
-                    variant={commandForm.allowedTools.includes(tool) ? "default" : "outline"}
+                    key={`${tool}-${forceRender}`}
+                    variant={commandForm.allowedTools.includes(tool) ? "outline" : "destructive"}
                     size="sm"
                     onClick={() => handleToolToggle(tool)}
                     type="button"
+                    className="transition-none"
                   >
                     {tool}
                   </Button>
@@ -646,12 +654,18 @@ export const SlashCommandsManager: React.FC<SlashCommandsManagerProps> = ({
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setEditDialogOpen(false)}
+              className="hover:!text-red-600"
+            >
               {t('buttons.cancel')}
             </Button>
             <Button
+              variant="outline"
               onClick={handleSave}
               disabled={!commandForm.name || !commandForm.content || saving}
+              className="hover:!text-gray-400 dark:hover:!text-gray-300"
             >
               {saving ? (
                 <>
@@ -707,7 +721,7 @@ export const SlashCommandsManager: React.FC<SlashCommandsManagerProps> = ({
                 </>
               ) : (
                 <>
-                  <Trash2 className="h-4 w-4 mr-2" />
+                  <Trash2 className="h-4 w-4 mr-2 hover:!text-red-600" />
                   {t('buttons.delete')}
                 </>
               )}
