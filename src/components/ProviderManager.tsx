@@ -251,7 +251,7 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
             size="sm"
             onClick={clearProvider}
             disabled={switching === 'clear'}
-            className="hover:!text-red-600"
+            className='hover:bg-red-500/10 hover:text-red-600'
           >
             {switching === 'clear' ? (
               <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
@@ -379,7 +379,7 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
                     size="sm"
                     onClick={() => handleDeleteProvider(config)}
                     disabled={deleting === config.id}
-                    className="text-xs text-red-600 hover:text-red-700"
+                    className="text-xs text-red-600 hover:text-red-700 hover:bg-red-500/10 hover:text-red-600"
                   >
                     {deleting === config.id ? (
                       <RefreshCw className="h-3 w-3 animate-spin" />
@@ -392,7 +392,7 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
                     size="sm"
                     onClick={() => switchProvider(config)}
                     disabled={switching === config.id || isCurrentProvider(config)}
-                    className="text-xs"
+                    className="text-xs hover:!text-gray-400 dark:hover:!text-gray-300"
                   >
                     {switching === config.id ? (
                       <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
@@ -430,7 +430,7 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
               variant="ghost"
               size="sm"
               onClick={() => setShowTokens(!showTokens)}
-              className="text-xs"
+              className="text-xs hover:!text-gray-400 dark:hover:!text-gray-300"
             >
               {showTokens ? (
                 <EyeOff className="h-3 w-3 mr-1" />
@@ -500,7 +500,7 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
                     variant="ghost"
                     size="sm"
                     onClick={() => setShowTokens(!showTokens)}
-                    className="text-xs"
+                    className="text-xs hover:!text-gray-400 dark:hover:!text-gray-300"
                   >
                     {showTokens ? (
                       <EyeOff className="h-3 w-3 mr-1" />

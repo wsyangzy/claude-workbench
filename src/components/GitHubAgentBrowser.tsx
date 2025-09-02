@@ -268,7 +268,7 @@ export const GitHubAgentBrowser: React.FC<GitHubAgentBrowserProps> = ({
                               handlePreviewAgent(agent);
                             }}
                           >
-                            <Eye className="h-3 w-3 mr-2" />
+                            <Eye className="h-3 w-3 mr-2 hover:!text-blue-500" />
                             Preview
                           </Button>
                         </CardFooter>

@@ -370,7 +370,11 @@ export const SlashCommandsManager: React.FC<SlashCommandsManagerProps> = ({
                   : t('common.noCommandsYet')}
             </p>
             {!searchQuery && (
-              <Button onClick={handleCreateNew} variant="outline" size="sm" className="mt-4">
+              <Button
+                  onClick={handleCreateNew}
+                  variant="outline"
+                  size="sm"
+                  className="mt-4 hover:!text-gray-400 dark:hover:!text-gray-300">
                 {scopeFilter === 'project' 
                   ? t('common.createFirstProjectCommand')
                   : t('common.createFirstCommand')}
@@ -460,7 +464,7 @@ export const SlashCommandsManager: React.FC<SlashCommandsManagerProps> = ({
                               variant="ghost"
                               size="icon"
                               onClick={() => handleEdit(command)}
-                              className="h-8 w-8"
+                              className="h-8 w-8 hover:bg-green-500/10 hover:text-green-600"
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
@@ -468,9 +472,9 @@ export const SlashCommandsManager: React.FC<SlashCommandsManagerProps> = ({
                               variant="ghost"
                               size="icon"
                               onClick={() => handleDeleteClick(command)}
-                              className="h-8 w-8 text-destructive hover:text-destructive"
+                              className="h-8 w-8 text-destructive hover:text-destructive hover:bg-red-500/10 hover:text-red-600"
                             >
-                              <Trash2 className="h-4 w-4 hover:!text-red-600" />
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
                         </div>
@@ -713,6 +717,7 @@ export const SlashCommandsManager: React.FC<SlashCommandsManagerProps> = ({
               variant="destructive"
               onClick={confirmDelete}
               disabled={deleting}
+              className="hover:bg-red-500/10 hover:text-red-600"
             >
               {deleting ? (
                 <>
@@ -721,7 +726,7 @@ export const SlashCommandsManager: React.FC<SlashCommandsManagerProps> = ({
                 </>
               ) : (
                 <>
-                  <Trash2 className="h-4 w-4 mr-2 hover:!text-red-600" />
+                  <Trash2 className="h-4 w-4 mr-2" />
                   {t('buttons.delete')}
                 </>
               )}

@@ -219,9 +219,9 @@ export default function ProviderForm({
                         onClick={() => setShowTokens(!showTokens)}
                       >
                         {showTokens ? (
-                          <EyeOff className="h-3 w-3" />
+                          <EyeOff className="h-4 w-4 hover:!text-blue-500" />
                         ) : (
-                          <Eye className="h-3 w-3" />
+                          <Eye className="h-4 w-4 hover:!text-blue-500" />
                         )}
                       </Button>
                     </div>
@@ -253,9 +253,9 @@ export default function ProviderForm({
                         onClick={() => setShowTokens(!showTokens)}
                       >
                         {showTokens ? (
-                          <EyeOff className="h-3 w-3" />
+                          <EyeOff className="h-4 w-4 hover:!text-blue-500" />
                         ) : (
-                          <Eye className="h-3 w-3" />
+                          <Eye className="h-4 w-4 hover:!text-blue-500" />
                         )}
                       </Button>
                     </div>
@@ -303,6 +303,7 @@ export default function ProviderForm({
               variant="outline"
               onClick={handleClose}
               disabled={loading}
+              className='hover:!text-gray-400 dark:hover:!text-gray-300'
             >
               <X className="h-4 w-4 mr-2" />
               取消
@@ -310,6 +311,7 @@ export default function ProviderForm({
             <Button
               type="submit"
               disabled={loading}
+              className='hover:!text-red-600'
             >
               {loading ? (
                 <div className="flex items-center">

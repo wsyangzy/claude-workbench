@@ -504,9 +504,9 @@ const RelayStationConfigDialog: React.FC<RelayStationConfigDialogProps> = ({
                     onClick={() => setShowToken(!showToken)}
                   >
                     {showToken ? (
-                      <EyeOff className="h-3 w-3" />
+                      <EyeOff className="h-3 w-3 hover:!text-blue-500" />
                     ) : (
-                      <Eye className="h-3 w-3" />
+                      <Eye className="h-3 w-3 hover:!text-blue-500" />
                     )}
                   </Button>
                 </div>

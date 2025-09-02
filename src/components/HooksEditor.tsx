@@ -573,8 +573,9 @@ export const HooksEditor: React.FC<HooksEditorProps> = ({
                 variant="ghost"
                 size="sm"
                 onClick={() => removeMatcher(event, matcher.id)}
+                className='hover:bg-red-500/10 hover:text-red-600'
               >
-                <Trash2 className="h-4 w-4 hover:!text-red-600" />
+                <Trash2 className="h-4 w-4" />
               </Button>
             )}
           </div>
@@ -642,8 +643,9 @@ export const HooksEditor: React.FC<HooksEditorProps> = ({
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => removeCommand(event, matcher.id, hook.id)}
+                                className='hover:bg-red-500/10 hover:text-red-600'
                               >
-                                <Trash2 className="h-4 w-4 hover:!text-red-600" />
+                                <Trash2 className="h-4 w-4" />
                               </Button>
                             )}
                           </div>
@@ -708,8 +710,9 @@ export const HooksEditor: React.FC<HooksEditorProps> = ({
                 variant="ghost"
                 size="sm"
                 onClick={() => removeDirectCommand(event, command.id)}
+                className='hover:bg-red-500/10 hover:text-red-600'
               >
-                <Trash2 className="h-4 w-4 hover:!text-red-600" />
+                <Trash2 className="h-4 w-4" />
               </Button>
             )}
           </div>

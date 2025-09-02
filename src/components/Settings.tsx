@@ -750,9 +750,9 @@ export const Settings: React.FC<SettingsProps> = ({
                               variant="ghost"
                               size="icon"
                               onClick={() => removePermissionRule("allow", rule.id)}
-                              className="h-8 w-8"
+                              className="h-8 w-8 hover:bg-red-500/10 hover:text-red-600" 
                             >
-                              <Trash2 className="h-4 w-4 hover:!text-red-600" />
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                           </motion.div>
                         ))
@@ -797,9 +797,9 @@ export const Settings: React.FC<SettingsProps> = ({
                               variant="ghost"
                               size="icon"
                               onClick={() => removePermissionRule("deny", rule.id)}
-                              className="h-8 w-8"
+                              className="h-8 w-8 hover:bg-red-500/10 hover:text-red-600"
                             >
-                              <Trash2 className="h-4 w-4 hover:!text-red-600" />
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                           </motion.div>
                         ))
@@ -891,9 +891,9 @@ export const Settings: React.FC<SettingsProps> = ({
                               variant="ghost"
                               size="icon"
                               onClick={() => removeEnvVar(envVar.id)}
-                              className="h-8 w-8 hover:text-destructive"
+                              className="h-8 w-8 hover:text-destructive hover:bg-red-500/10 hover:text-red-600"
                             >
-                              <Trash2 className="h-4 w-4 hover:!text-red-600" />
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                           </motion.div>
                         ))}

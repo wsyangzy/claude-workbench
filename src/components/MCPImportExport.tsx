@@ -211,7 +211,7 @@ export const MCPImportExport: React.FC<MCPImportExportProps> = ({
             <Button
               onClick={handleImportFromDesktop}
               disabled={importingDesktop}
-              className="w-full gap-2 bg-primary hover:bg-primary/90"
+              className="w-full gap-2 bg-primary hover:bg-primary/90 border-blue-500/20 hover:bg-blue-500/10 hover:text-blue-600 hover:border-blue-500/50"
             >
               {importingDesktop ? (
                 <>
@@ -254,7 +254,7 @@ export const MCPImportExport: React.FC<MCPImportExportProps> = ({
               <Button
                 onClick={() => document.getElementById("json-file-input")?.click()}
                 disabled={importingJson}
-                className="w-full gap-2"
+                className="w-full gap-2 border-purple-500/20 hover:bg-purple-500/10 hover:text-purple-600 hover:border-purple-500/50"
                 variant="outline"
               >
                 {importingJson ? (

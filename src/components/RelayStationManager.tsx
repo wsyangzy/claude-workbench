@@ -490,9 +490,9 @@ const AddStationDialog: React.FC<AddStationDialogProps> = ({
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
+                    <EyeOff className="h-4 w-4 hover:!text-blue-500" />
                   ) : (
-                    <Eye className="h-4 w-4" />
+                    <Eye className="h-4 w-4 hover:!text-blue-500" />
                   )}
                 </Button>
               </div>
@@ -548,7 +548,11 @@ const AddStationDialog: React.FC<AddStationDialogProps> = ({
             </div>
           </div>
           <DialogFooter>
-            <Button type="submit" disabled={loading}>
+            <Button
+              type="submit"
+              disabled={loading}
+              className='hover:!text-gray-400 dark:hover:!text-gray-300'
+            >
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {editMode ? '保存更改' : '添加站点'}
             </Button>
@@ -2375,6 +2379,7 @@ const StationDetailView: React.FC<DetailViewProps> = ({ station, onBack, onStati
                         <Button 
                           variant="destructive" 
                           onClick={() => setShowDeleteStationDialog(true)}
+                          className='hover:bg-red-500/10 hover:text-red-600'
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
                           删除中转站
@@ -2460,7 +2465,7 @@ const StationDetailView: React.FC<DetailViewProps> = ({ station, onBack, onStati
             <Button
               variant="destructive"
               onClick={confirmDeleteToken}
-              className="gap-2"
+              className="gap-2 hover:bg-red-500/10 hover:text-red-600"
               disabled={deletingToken}
             >
               {deletingToken ? (
@@ -2544,7 +2549,7 @@ const StationDetailView: React.FC<DetailViewProps> = ({ station, onBack, onStati
             <Button
               variant="destructive"
               onClick={confirmDeleteStation}
-              className="gap-2"
+              className="gap-2 hover:bg-red-500/10 hover:text-red-600"
               disabled={deletingStation}
             >
               {deletingStation ? (
@@ -3112,7 +3117,7 @@ const RelayStationManager: React.FC<RelayStationManagerProps> = ({ onBack }) => 
                       variant="outline"
                       size="sm"
                       onClick={() => handleDeleteStation(station)}
-                      className="text-xs text-red-600 hover:text-red-700"
+                      className="text-xs text-red-600 hover:text-red-700 hover:bg-red-500/10 hover:text-red-600"
                     >
                       <Trash2 className="h-3 w-3" />
                     </Button>
@@ -3168,6 +3173,7 @@ const RelayStationManager: React.FC<RelayStationManagerProps> = ({ onBack }) => 
             <Button
               variant="destructive"
               onClick={confirmDeleteStation}
+              className='hover:bg-red-500/10 hover:text-red-600'
             >
               <Trash2 className="h-4 w-4 mr-2" />
               确认删除
@@ -3268,12 +3274,14 @@ const RelayStationManager: React.FC<RelayStationManagerProps> = ({ onBack }) => 
                 setOverwriteExisting(false);
               }}
               disabled={isImporting}
+              className='hover:!text-red-600'
             >
               取消
             </Button>
             <Button
               onClick={confirmImportStations}
               disabled={isImporting || !importData}
+              className='hover:!text-gray-400 dark:hover:!text-gray-300'
             >
               {isImporting ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />

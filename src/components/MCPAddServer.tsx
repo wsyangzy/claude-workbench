@@ -218,7 +218,7 @@ export const MCPAddServer: React.FC<MCPAddServerProps> = ({
             variant="outline"
             size="sm"
             onClick={() => addEnvVar(type)}
-            className="gap-2"
+            className="gap-2 hover:!text-gray-400 dark:hover:!text-gray-300"
           >
             <Plus className="h-3 w-3" />
             {t('mcp.addServer.addVariable')}
@@ -269,9 +269,9 @@ export const MCPAddServer: React.FC<MCPAddServerProps> = ({
                   variant="ghost"
                   size="icon"
                   onClick={() => removeEnvVar(type, envVar.id)}
-                  className="h-8 w-8 hover:text-destructive"
+                  className="h-8 w-8 hover:text-destructive hover:bg-red-500/10 hover:text-red-600"
                 >
-                  <Trash2 className="h-4 w-4 hover:!text-red-600" />
+                  <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
             ))}
@@ -374,7 +374,7 @@ export const MCPAddServer: React.FC<MCPAddServerProps> = ({
               <Button
                 onClick={handleAddStdioServer}
                 disabled={saving}
-                className="w-full gap-2 bg-primary hover:bg-primary/90"
+                className="w-full gap-2 bg-primary hover:bg-primary/90 hover:!text-gray-400 dark:hover:!text-gray-300"
               >
                 {saving ? (
                   <>
@@ -443,7 +443,7 @@ export const MCPAddServer: React.FC<MCPAddServerProps> = ({
               <Button
                 onClick={handleAddSseServer}
                 disabled={saving}
-                className="w-full gap-2 bg-primary hover:bg-primary/90"
+                className="w-full gap-2 bg-primary hover:bg-primary/90 hover:!text-gray-400 dark:hover:!text-gray-300"
               >
                 {saving ? (
                   <>

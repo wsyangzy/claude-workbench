@@ -209,7 +209,7 @@ export const MCPServerList: React.FC<MCPServerListProps> = ({
                     variant="ghost"
                     size="sm"
                     onClick={() => toggleExpanded(server.name)}
-                    className="h-6 px-2 text-xs hover:bg-primary/10"
+                    className="h-6 px-2 text-xs hover:bg-primary/10 hover:!text-gray-400 dark:hover:!text-gray-300"
                   >
                     <ChevronDown className="h-3 w-3 mr-1" />
                     {t('mcp.serverList.showFull')}  
@@ -251,12 +251,12 @@ export const MCPServerList: React.FC<MCPServerListProps> = ({
                 size="sm"
                 onClick={() => handleRemoveServer(server.name)}
                 disabled={removingServer === server.name}
-                className="hover:bg-destructive/10 hover:text-destructive"
+                className="hover:bg-destructive/10 hover:text-destructive hover:bg-red-500/10 hover:text-red-600"
               >
                 {removingServer === server.name ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  <Trash2 className="h-4 w-4 hover:!text-red-600" />
+                  <Trash2 className="h-4 w-4" />
                 )}
               </Button>
             </div>
@@ -280,7 +280,7 @@ export const MCPServerList: React.FC<MCPServerListProps> = ({
                         variant="ghost"
                         size="sm"
                         onClick={() => copyCommand(server.command!, server.name)}
-                        className="h-6 px-2 text-xs hover:bg-primary/10"
+                        className="h-6 px-2 text-xs hover:bg-primary/10 hover:!text-gray-400 dark:hover:!text-gray-300"
                       >
                         <Copy className="h-3 w-3 mr-1" />
                         {isCopied ? t('mcp.serverList.copied') : t('mcp.serverList.copy')}
@@ -289,7 +289,7 @@ export const MCPServerList: React.FC<MCPServerListProps> = ({
                         variant="ghost"
                         size="sm"
                         onClick={() => toggleExpanded(server.name)}
-                        className="h-6 px-2 text-xs hover:bg-primary/10"
+                        className="h-6 px-2 text-xs hover:bg-primary/10 hover:!text-gray-400 dark:hover:!text-gray-300"
                       >
                         <ChevronUp className="h-3 w-3 mr-1" />
                         {t('mcp.serverList.hide')}
@@ -368,7 +368,7 @@ export const MCPServerList: React.FC<MCPServerListProps> = ({
           variant="outline"
           size="sm"
           onClick={onRefresh}
-          className="gap-2 hover:bg-primary/10 hover:text-primary hover:border-primary/50"
+          className="gap-2 hover:bg-primary/10 hover:text-primary hover:border-primary/50 hover:!text-gray-400 dark:hover:!text-gray-300"
         >
           <RefreshCw className="h-4 w-4" />
           {t('mcp.serverList.refresh')}

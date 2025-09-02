@@ -270,7 +270,7 @@ export const ClaudeStatusIndicator: React.FC<ClaudeStatusIndicatorProps> = ({
                         size="sm"
                         onClick={handleRefresh}
                         disabled={isRefreshing}
-                        className="h-6 w-6 p-0"
+                        className="h-6 w-6 p-0 hover:!text-gray-400 dark:hover:!text-gray-300"
                       >
                         <RefreshCw className={cn("h-3 w-3", isRefreshing && "animate-spin")} />
                       </Button>
@@ -287,7 +287,7 @@ export const ClaudeStatusIndicator: React.FC<ClaudeStatusIndicatorProps> = ({
                           variant="ghost"
                           size="sm"
                           onClick={onSettingsClick}
-                          className="h-6 w-6 p-0"
+                          className="h-6 w-6 p-0 hover:!text-gray-400 dark:hover:!text-gray-300"
                         >
                           <Settings className="h-3 w-3" />
                         </Button>

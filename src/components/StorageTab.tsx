@@ -344,7 +344,7 @@ export const StorageTab: React.FC = () => {
                 variant="outline"
                 size="sm"
                 onClick={() => setShowSqlEditor(true)}
-                className="gap-2 h-8 text-xs"
+                className="gap-2 h-8 text-xs hover:!text-gray-400 dark:hover:!text-gray-300"
               >
                 <Terminal className="h-3 w-3" />
                 {t('common.sqlQuery')}
@@ -353,7 +353,7 @@ export const StorageTab: React.FC = () => {
                 variant="destructive"
                 size="sm"
                 onClick={() => setShowResetConfirm(true)}
-                className="gap-2 h-8 text-xs"
+                className="gap-2 h-8 text-xs hover:!text-red-600"
               >
                 <RefreshCw className="h-3 w-3" />
                 {t('common.resetDb')}
@@ -403,7 +403,7 @@ export const StorageTab: React.FC = () => {
                 variant="outline"
                 size="sm"
                 onClick={() => setNewRow({})}
-                className="gap-2 h-8 text-xs"
+                className="gap-2 h-8 text-xs hover:!text-gray-400 dark:hover:!text-gray-300"
               >
                 <Plus className="h-3 w-3" />
                 {t('common.addNewRow')}
@@ -503,7 +503,7 @@ export const StorageTab: React.FC = () => {
                             variant="ghost"
                             size="icon"
                             onClick={() => setDeletingRow(row)}
-                            className="h-6 w-6 hover:text-destructive"
+                            className="h-6 w-6 hover:text-destructive hover:bg-red-500/10 hover:text-red-600"
                           >
                             <Trash2 className="h-3 w-3" />
                           </Button>
@@ -707,12 +707,17 @@ export const StorageTab: React.FC = () => {
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setNewRow(null)}>
+            <Button
+              variant="outline"
+              onClick={() => setNewRow(null)}
+              className="hover:!text-red-600"
+            >
               {t('buttons.cancel')}
             </Button>
             <Button
               onClick={() => handleInsertRow(newRow!)}
               disabled={loading}
+              className="hover:!text-gray-400 dark:hover:!text-gray-300"
             >
               {loading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -789,6 +794,7 @@ export const StorageTab: React.FC = () => {
             <Button
               variant="outline"
               onClick={() => setShowResetConfirm(false)}
+              className="hover:!text-gray-400 dark:hover:!text-gray-300"
             >
               {t('buttons.cancel')}
             </Button>
@@ -796,6 +802,7 @@ export const StorageTab: React.FC = () => {
               variant="destructive"
               onClick={handleResetDatabase}
               disabled={loading}
+              className="hover:!text-red-600"
             >
               {loading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -923,12 +930,14 @@ export const StorageTab: React.FC = () => {
                 setSqlResult(null);
                 setSqlError(null);
               }}
+              className="hover:!text-red-600"
             >
               {t('common.close')}
             </Button>
             <Button
               onClick={handleExecuteSql}
               disabled={loading || !sqlQuery.trim()}
+              className="hover:!text-gray-400 dark:hover:!text-gray-300"
             >
               {loading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
