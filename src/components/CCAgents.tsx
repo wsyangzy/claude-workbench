@@ -451,7 +451,7 @@ export const CCAgents: React.FC<CCAgentsProps> = ({ onBack, className }) => {
                                   size="sm"
                                   variant="ghost"
                                   onClick={() => handleDeleteAgent(agent)}
-                                  className="flex items-center gap-1 text-destructive hover:text-destructive hover:!text-red-600"
+                                  className="flex items-center gap-1 text-destructive hover:text-destructive hover:text-red-700 hover:bg-red-500/10 hover:text-red-600"
                                   title={t('common.deleteAgentTitle')}
                                 >
                                   <Trash2 className="h-3 w-3" />

@@ -78,7 +78,7 @@ export const Settings: React.FC<SettingsProps> = ({
   const [currentBinaryPath, setCurrentBinaryPath] = useState<string | null>(null);
   const [selectedInstallation, setSelectedInstallation] = useState<ClaudeInstallation | null>(null);
   const [binaryPathChanged, setBinaryPathChanged] = useState(false);
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'warning' } | null>(null);
   
   // Custom Claude path state
   const [customClaudePath, setCustomClaudePath] = useState<string>("");
@@ -91,7 +91,8 @@ export const Settings: React.FC<SettingsProps> = ({
   
   // Environment variables state
   const [envVars, setEnvVars] = useState<EnvironmentVariable[]>([]);
-  
+  const [originalEnvVars, setOriginalEnvVars] = useState<EnvironmentVariable[]>([]);
+  const [hasUnsavedEnvChanges, setHasUnsavedEnvChanges] = useState(false);
   
   // Hooks state
   const [userHooksChanged, setUserHooksChanged] = useState(false);
@@ -119,6 +120,16 @@ export const Settings: React.FC<SettingsProps> = ({
       window.removeEventListener('provider-config-changed', handleProviderConfigChange);
     };
   }, []);
+
+  // 监听环境变量未保存状态变化，显示Toast提示
+  useEffect(() => {
+    if (hasUnsavedEnvChanges) {
+      setToast({ 
+        message: "环境配置有未保存的修改，请点击保存按钮保存", 
+        type: "warning" 
+      });
+    }
+  }, [hasUnsavedEnvChanges]);
 
     /**
    * 加载应用信息
@@ -243,14 +254,19 @@ export const Settings: React.FC<SettingsProps> = ({
 
       // Parse environment variables
       if (loadedSettings.env && typeof loadedSettings.env === 'object' && !Array.isArray(loadedSettings.env)) {
-        setEnvVars(
-          Object.entries(loadedSettings.env).map(([key, value], index) => ({
-            id: `env-${index}`,
-            key,
-            value: value as string,
-            enabled: true, // 默认启用所有现有的环境变量
-          }))
-        );
+        const envVarList = Object.entries(loadedSettings.env).map(([key, value], index) => ({
+          id: `env-${index}`,
+          key,
+          value: value as string,
+          enabled: true, // 默认启用所有现有的环境变量
+        }));
+        setEnvVars(envVarList);
+        setOriginalEnvVars(JSON.parse(JSON.stringify(envVarList))); // 深拷贝作为原始状态
+        setHasUnsavedEnvChanges(false);
+      } else {
+        setEnvVars([]);
+        setOriginalEnvVars([]);
+        setHasUnsavedEnvChanges(false);
       }
 
     } catch (err) {
@@ -308,6 +324,10 @@ export const Settings: React.FC<SettingsProps> = ({
       }
 
       setToast({ message: t('common.settingsSavedSuccessfully'), type: "success" });
+      
+      // 保存成功后重置环境变量未保存状态
+      setOriginalEnvVars(JSON.parse(JSON.stringify(envVars))); // 更新原始状态
+      setHasUnsavedEnvChanges(false); // 重置未保存标记
     } catch (err) {
       console.error("Failed to save settings:", err);
       setError(t('common.failedToSaveSettings'));
@@ -315,6 +335,31 @@ export const Settings: React.FC<SettingsProps> = ({
     } finally {
       setSaving(false);
     }
+  };
+
+  /**
+   * 检查环境变量是否有未保存的变更
+   * Check if environment variables have unsaved changes
+   */
+  const checkEnvVarChanges = (currentVars: EnvironmentVariable[]) => {
+    // 比较当前环境变量与原始状态
+    if (currentVars.length !== originalEnvVars.length) {
+      return true;
+    }
+    
+    for (let i = 0; i < currentVars.length; i++) {
+      const current = currentVars[i];
+      const original = originalEnvVars.find(orig => orig.id === current.id);
+      
+      if (!original || 
+          current.key !== original.key || 
+          current.value !== original.value || 
+          current.enabled !== original.enabled) {
+        return true;
+      }
+    }
+    
+    return false;
   };
 
   /**
@@ -376,23 +421,29 @@ export const Settings: React.FC<SettingsProps> = ({
       value: "",
       enabled: true, // 默认启用新的环境变量
     };
-    setEnvVars(prev => [...prev, newVar]);
+    const updatedVars = [...envVars, newVar];
+    setEnvVars(updatedVars);
+    setHasUnsavedEnvChanges(checkEnvVarChanges(updatedVars));
   };
 
   /**
    * Updates an environment variable
    */
   const updateEnvVar = (id: string, field: "key" | "value" | "enabled", value: string | boolean) => {
-    setEnvVars(prev => prev.map(envVar => 
+    const updatedVars = envVars.map(envVar => 
       envVar.id === id ? { ...envVar, [field]: value } : envVar
-    ));
+    );
+    setEnvVars(updatedVars);
+    setHasUnsavedEnvChanges(checkEnvVarChanges(updatedVars));
   };
 
   /**
    * Removes an environment variable
    */
   const removeEnvVar = (id: string) => {
-    setEnvVars(prev => prev.filter(envVar => envVar.id !== id));
+    const updatedVars = envVars.filter(envVar => envVar.id !== id);
+    setEnvVars(updatedVars);
+    setHasUnsavedEnvChanges(checkEnvVarChanges(updatedVars));
   };
 
   /**
@@ -401,6 +452,22 @@ export const Settings: React.FC<SettingsProps> = ({
   const handleClaudeInstallationSelect = (installation: ClaudeInstallation) => {
     setSelectedInstallation(installation);
     setBinaryPathChanged(installation.path !== currentBinaryPath);
+  };
+
+  /**
+   * 处理页签切换
+   * Handle tab change with unsaved changes check
+   */
+  const handleTabChange = (newTab: string) => {
+    // 如果当前在环境页签且有未保存修改，阻止切换
+    if (activeTab === "environment" && hasUnsavedEnvChanges) {
+      setToast({ 
+        message: "请先保存环境配置修改后再切换页签", 
+        type: "warning" 
+      });
+      return;
+    }
+    setActiveTab(newTab);
   };
 
   return (
@@ -434,7 +501,7 @@ export const Settings: React.FC<SettingsProps> = ({
           onClick={saveSettings}
           disabled={saving || loading}
           size="sm"
-          className="gap-2 bg-primary hover:bg-primary/90 hover:!text-gray-400 dark:hover:!text-gray-300"
+          className="gap-2 bg-primary hover:bg-primary/90 hover:bg-green-500/10 hover:text-green-600"
         >
           {saving ? (
             <>
@@ -472,11 +539,17 @@ export const Settings: React.FC<SettingsProps> = ({
         </div>
       ) : (
         <div className="flex-1 overflow-y-auto p-4">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
             <TabsList className="grid grid-cols-10 w-full">
               <TabsTrigger value="general">{t('settings.general')}</TabsTrigger>
               <TabsTrigger value="permissions">{t('common.permissions')}</TabsTrigger>
-              <TabsTrigger value="environment">{t('common.environment')}</TabsTrigger>
+              <TabsTrigger value="environment" className="relative">
+                {t('common.environment')}
+                {hasUnsavedEnvChanges && (
+                  <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse" 
+                        title="有未保存的环境变量修改" />
+                )}
+              </TabsTrigger>
               <TabsTrigger value="advanced">{t('common.advanced')}</TabsTrigger>
               <TabsTrigger value="hooks">{t('common.hooks')}</TabsTrigger>
               <TabsTrigger value="commands">{t('common.commands')}</TabsTrigger>
@@ -510,7 +583,7 @@ export const Settings: React.FC<SettingsProps> = ({
                           variant={theme === 'light' ? 'outline' : 'default'}
                           size="sm"
                           onClick={() => setTheme('light')}
-                          className="hover:!text-gray-400 dark:hover:!text-gray-300"
+                          className="hover:!text-gray-400 dark:hover:!text-gray-300 hover:bg-gray-500/10"
                         >
                           {t('settings.themeLight')}
                         </Button>
@@ -518,7 +591,7 @@ export const Settings: React.FC<SettingsProps> = ({
                           variant={theme === 'dark' ? 'outline' : 'default'}
                           size="sm"
                           onClick={() => setTheme('dark')}
-                          className="hover:!text-gray-400 dark:hover:!text-gray-300"
+                          className="hover:!text-gray-400 dark:hover:!text-gray-300 hover:bg-gray-500/10"
                         >
                           {t('settings.themeDark')}
                         </Button>
@@ -624,14 +697,14 @@ export const Settings: React.FC<SettingsProps> = ({
                             </p>
                           </div>
                           <Button
-                            variant="outline"
+                            variant={isCustomPathMode ? "destructive" : "outline"}
                             size="sm"
                             onClick={() => {
                               setIsCustomPathMode(!isCustomPathMode);
                               setCustomPathError(null);
                               setCustomClaudePath("");
                             }}
-                            className={!isCustomPathMode ? "hover:!text-gray-400 dark:hover:!text-gray-300" : "hover:!text-red-600"}
+                            className={!isCustomPathMode ? "hover:!text-gray-400 dark:hover:!text-gray-300 hover:bg-gray-500/10" : ""}
                           >
                             {isCustomPathMode ? t('common.cancel') : t('common.setCustomPath')}
                           </Button>
@@ -665,7 +738,7 @@ export const Settings: React.FC<SettingsProps> = ({
                                   size="sm"
                                   onClick={handleSetCustomPath}
                                   disabled={!customClaudePath.trim()}
-                                  className="hover:!text-gray-400 dark:hover:!text-gray-300"
+                                  className="hover:!text-gray-400 dark:hover:!text-gray-300 hover:bg-gray-500/10"
                                 >
                                   {t('common.setPath')}
                                 </Button>
@@ -673,7 +746,7 @@ export const Settings: React.FC<SettingsProps> = ({
                                   variant="outline"
                                   size="sm"
                                   onClick={handleClearCustomPath}
-                                  className="hover:!text-gray-400 dark:hover:!text-gray-300"
+                                  className="hover:!text-gray-400 dark:hover:!text-gray-300 hover:bg-gray-500/10"
                                 >
                                   {t('common.revertToAutoDetection')}
                                 </Button>
@@ -838,7 +911,7 @@ export const Settings: React.FC<SettingsProps> = ({
                       variant="outline"
                       size="sm"
                       onClick={addEnvVar}
-                      className="gap-2 hover:!text-gray-400 dark:hover:!text-gray-300"
+                      className="gap-2 hover:!text-gray-400 dark:hover:!text-gray-300 hover:bg-gray-500/10"
                     >
                       <Plus className="h-3 w-3" />
                       {t('common.addVariable')}

@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { flushSync } from "react-dom";
+import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Plus, 
@@ -312,7 +311,7 @@ export const SlashCommandsManager: React.FC<SlashCommandsManagerProps> = ({
               : t('common.createCustomCommandsWorkflow')}
           </p>
         </div>
-        <Button onClick={handleCreateNew} size="sm" className="gap-2 hover:!text-gray-400 dark:hover:!text-gray-300">
+        <Button onClick={handleCreateNew} size="sm" className="gap-2 hover:!text-gray-400 dark:hover:!text-gray-300 hover:bg-gray-500/10">
           <Plus className="h-4 w-4" />
           {t('common.newCommand')}
         </Button>
@@ -374,7 +373,7 @@ export const SlashCommandsManager: React.FC<SlashCommandsManagerProps> = ({
                   onClick={handleCreateNew}
                   variant="outline"
                   size="sm"
-                  className="mt-4 hover:!text-gray-400 dark:hover:!text-gray-300">
+                  className="mt-4 hover:!text-gray-400 dark:hover:!text-gray-300 hover:bg-gray-500/10">
                 {scopeFilter === 'project' 
                   ? t('common.createFirstProjectCommand')
                   : t('common.createFirstCommand')}
@@ -661,7 +660,7 @@ export const SlashCommandsManager: React.FC<SlashCommandsManagerProps> = ({
             <Button
               variant="outline"
               onClick={() => setEditDialogOpen(false)}
-              className="hover:!text-red-600"
+              className="hover:text-red-700 hover:bg-red-500/10 hover:text-red-600"
             >
               {t('buttons.cancel')}
             </Button>
@@ -669,7 +668,7 @@ export const SlashCommandsManager: React.FC<SlashCommandsManagerProps> = ({
               variant="outline"
               onClick={handleSave}
               disabled={!commandForm.name || !commandForm.content || saving}
-              className="hover:!text-gray-400 dark:hover:!text-gray-300"
+              className="hover:!text-gray-400 dark:hover:!text-gray-300 hover:bg-gray-500/10"
             >
               {saving ? (
                 <>

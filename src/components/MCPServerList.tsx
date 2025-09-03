@@ -209,7 +209,7 @@ export const MCPServerList: React.FC<MCPServerListProps> = ({
                     variant="ghost"
                     size="sm"
                     onClick={() => toggleExpanded(server.name)}
-                    className="h-6 px-2 text-xs hover:bg-primary/10 hover:!text-gray-400 dark:hover:!text-gray-300"
+                    className="h-6 px-2 text-xs hover:bg-primary/10 hover:!text-gray-400 dark:hover:!text-gray-300 hover:bg-gray-500/10"
                   >
                     <ChevronDown className="h-3 w-3 mr-1" />
                     {t('mcp.serverList.showFull')}  
@@ -280,7 +280,7 @@ export const MCPServerList: React.FC<MCPServerListProps> = ({
                         variant="ghost"
                         size="sm"
                         onClick={() => copyCommand(server.command!, server.name)}
-                        className="h-6 px-2 text-xs hover:bg-primary/10 hover:!text-gray-400 dark:hover:!text-gray-300"
+                        className="h-6 px-2 text-xs hover:bg-primary/10 hover:!text-gray-400 dark:hover:!text-gray-300 hover:bg-gray-500/10"
                       >
                         <Copy className="h-3 w-3 mr-1" />
                         {isCopied ? t('mcp.serverList.copied') : t('mcp.serverList.copy')}
@@ -289,7 +289,7 @@ export const MCPServerList: React.FC<MCPServerListProps> = ({
                         variant="ghost"
                         size="sm"
                         onClick={() => toggleExpanded(server.name)}
-                        className="h-6 px-2 text-xs hover:bg-primary/10 hover:!text-gray-400 dark:hover:!text-gray-300"
+                        className="h-6 px-2 text-xs hover:bg-primary/10 hover:!text-gray-400 dark:hover:!text-gray-300 hover:bg-gray-500/10"
                       >
                         <ChevronUp className="h-3 w-3 mr-1" />
                         {t('mcp.serverList.hide')}
@@ -368,7 +368,7 @@ export const MCPServerList: React.FC<MCPServerListProps> = ({
           variant="outline"
           size="sm"
           onClick={onRefresh}
-          className="gap-2 hover:bg-primary/10 hover:text-primary hover:border-primary/50 hover:!text-gray-400 dark:hover:!text-gray-300"
+          className="gap-2 hover:bg-primary/10 hover:text-primary hover:border-primary/50 hover:!text-gray-400 dark:hover:!text-gray-300 hover:bg-gray-500/10"
         >
           <RefreshCw className="h-4 w-4" />
           {t('mcp.serverList.refresh')}

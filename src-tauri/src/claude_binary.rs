@@ -148,7 +148,7 @@ fn store_claude_path(app_handle: &tauri::AppHandle, path: &str) -> Result<(), St
 }
 
 /// Test if a Claude binary is actually functional (Windows-only)
-fn test_claude_binary(path: &str) -> bool {    
+pub fn test_claude_binary(path: &str) -> bool {    
     debug!("Testing Claude binary at: {}", path);
     
     // Test with a simple --version command 

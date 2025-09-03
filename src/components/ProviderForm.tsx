@@ -303,7 +303,7 @@ export default function ProviderForm({
               variant="outline"
               onClick={handleClose}
               disabled={loading}
-              className='hover:!text-gray-400 dark:hover:!text-gray-300'
+              className='hover:bg-red-500/10 hover:text-red-600'
             >
               <X className="h-4 w-4 mr-2" />
               取消
@@ -311,7 +311,7 @@ export default function ProviderForm({
             <Button
               type="submit"
               disabled={loading}
-              className='hover:!text-red-600'
+              className='hover:bg-green-500/10 hover:text-green-600'
             >
               {loading ? (
                 <div className="flex items-center">

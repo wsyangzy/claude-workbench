@@ -1,9 +1,9 @@
 import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, CheckCircle, AlertCircle, Info } from "lucide-react";
+import { X, CheckCircle, AlertCircle, Info, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export type ToastType = "success" | "error" | "info";
+export type ToastType = "success" | "error" | "info" | "warning";
 
 interface ToastProps {
   /**
@@ -60,12 +60,14 @@ export const Toast: React.FC<ToastProps> = ({
     success: <CheckCircle className="h-4 w-4" />,
     error: <AlertCircle className="h-4 w-4" />,
     info: <Info className="h-4 w-4" />,
+    warning: <AlertTriangle className="h-4 w-4" />,
   };
   
   const colors = {
     success: "text-green-600",
     error: "text-destructive",
     info: "text-primary",
+    warning: "text-amber-600 dark:text-amber-400",
   };
   
   return (

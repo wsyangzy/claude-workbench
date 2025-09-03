@@ -369,6 +369,19 @@ export interface CurrentProviderConfig {
 }
 
 /**
+ * Represents an environment variable configuration
+ */
+export interface EnvironmentVariable {
+  id: string;
+  key: string;
+  value: string;
+  enabled: boolean;
+  created_at: number;
+  updated_at: number;
+  is_system_var?: boolean; // 标记是否为系统变量（与后端字段名保持一致）
+}
+
+/**
  * Represents an MCP server configuration
  */
 export interface MCPServer {
@@ -2375,6 +2388,90 @@ export const api = {
     }
   },
 
+  // Environment Variable Management API methods
+
+  /**
+   * Gets all environment variables
+   * @returns Promise resolving to array of environment variables
+   */
+  async getEnvironmentVariables(): Promise<EnvironmentVariable[]> {
+    try {
+      return await invoke<EnvironmentVariable[]>("get_environment_variables");
+    } catch (error) {
+      console.error("Failed to get environment variables:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Forces re-migration of environment variables from settings.json
+   * @returns Promise resolving to array of migrated environment variables
+   */
+  async forceMigrateEnvironmentVariables(): Promise<EnvironmentVariable[]> {
+    try {
+      return await invoke<EnvironmentVariable[]>("force_migrate_environment_variables");
+    } catch (error) {
+      console.error("Failed to force migrate environment variables:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Forces synchronization of environment variables to settings.json
+   * @returns Promise resolving to success message
+   */
+  async forceSyncEnvironmentVariables(): Promise<string> {
+    try {
+      return await invoke<string>("force_sync_environment_variables");
+    } catch (error) {
+      console.error("Failed to force sync environment variables:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Saves an environment variable (create or update)
+   * @param variable - The environment variable to save
+   * @returns Promise resolving to success message
+   */
+  async saveEnvironmentVariable(variable: EnvironmentVariable): Promise<string> {
+    try {
+      return await invoke<string>("save_environment_variable", { variable });
+    } catch (error) {
+      console.error("Failed to save environment variable:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Deletes an environment variable
+   * @param id - The ID of the environment variable to delete
+   * @returns Promise resolving to success message
+   */
+  async deleteEnvironmentVariable(id: string): Promise<string> {
+    try {
+      return await invoke<string>("delete_environment_variable", { id });
+    } catch (error) {
+      console.error("Failed to delete environment variable:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Toggles the enabled status of an environment variable
+   * @param id - The ID of the environment variable to toggle
+   * @param enabled - The new enabled status
+   * @returns Promise resolving to success message
+   */
+  async toggleEnvironmentVariable(id: string, enabled: boolean): Promise<string> {
+    try {
+      return await invoke<string>("toggle_environment_variable", { id, enabled });
+    } catch (error) {
+      console.error("Failed to toggle environment variable:", error);
+      throw error;
+    }
+  },
+
   /**
    * Enhances a prompt using Claude Code SDK
    * @param prompt - The original prompt to enhance
@@ -2468,7 +2565,7 @@ export const api = {
    */
   async addRelayStation(request: CreateRelayStationRequest): Promise<RelayStation> {
     try {
-      return await invoke<RelayStation>("add_relay_station", { request });
+      return await invoke<RelayStation>("add_relay_station", { stationRequest: request });
     } catch (error) {
       console.error("Failed to add relay station:", error);
       throw error;

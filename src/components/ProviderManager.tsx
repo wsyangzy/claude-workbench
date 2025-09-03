@@ -232,7 +232,7 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
             variant="outline"
             size="sm"
             onClick={handleAddProvider}
-            className="text-xs hover:!text-gray-400 dark:hover:!text-gray-300"
+            className="text-xs hover:!text-gray-400 dark:hover:!text-gray-300 hover:bg-gray-500/10"
           >
             <Plus className="h-3 w-3 mr-1" />
             添加代理商
@@ -241,7 +241,7 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
             variant="outline"
             size="sm"
             onClick={() => setShowCurrentConfig(true)}
-            className="text-xs hover:!text-gray-400 dark:hover:!text-gray-300"
+            className="text-xs hover:!text-gray-400 dark:hover:!text-gray-300 hover:bg-gray-500/10"
           >
             <Eye className="h-3 w-3 mr-1" />
             查看当前配置
@@ -312,7 +312,7 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
                 <Button
                   onClick={handleAddProvider}
                   size="sm"
-                  className="text-xs hover:!text-gray-400 dark:hover:!text-gray-300"
+                  className="text-xs hover:!text-gray-400 dark:hover:!text-gray-300 hover:bg-gray-500/10"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   添加第一个代理商
@@ -392,7 +392,7 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
                     size="sm"
                     onClick={() => switchProvider(config)}
                     disabled={switching === config.id || isCurrentProvider(config)}
-                    className="text-xs hover:!text-gray-400 dark:hover:!text-gray-300"
+                    className="hover:bg-green-500/10 hover:text-green-600"
                   >
                     {switching === config.id ? (
                       <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
@@ -430,7 +430,7 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
               variant="ghost"
               size="sm"
               onClick={() => setShowTokens(!showTokens)}
-              className="text-xs hover:!text-gray-400 dark:hover:!text-gray-300"
+              className="text-xs hover:!text-gray-400 dark:hover:!text-gray-300 hover:bg-gray-500/10"
             >
               {showTokens ? (
                 <EyeOff className="h-3 w-3 mr-1" />
@@ -500,7 +500,7 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
                     variant="ghost"
                     size="sm"
                     onClick={() => setShowTokens(!showTokens)}
-                    className="text-xs hover:!text-gray-400 dark:hover:!text-gray-300"
+                    className="text-xs hover:!text-gray-400 dark:hover:!text-gray-300 hover:bg-gray-500/10"
                   >
                     {showTokens ? (
                       <EyeOff className="h-3 w-3 mr-1" />
@@ -564,7 +564,7 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
               variant="destructive"
               onClick={confirmDeleteProvider}
               disabled={deleting === providerToDelete?.id}
-              className="hover:!text-red-600"
+              className="hover:text-red-700 hover:bg-red-500/10 hover:text-red-600"
             >
               {deleting === providerToDelete?.id ? (
                 <div className="flex items-center">

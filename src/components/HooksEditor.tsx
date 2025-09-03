@@ -598,7 +598,7 @@ export const HooksEditor: React.FC<HooksEditorProps> = ({
                     variant="outline"
                     size="sm"
                     onClick={() => addCommand(event, matcher.id)}
-                    className="hover:!text-gray-400 dark:hover:!text-gray-300"
+                    className="hover:!text-gray-400 dark:hover:!text-gray-300 hover:bg-gray-500/10"
                   >
                     <Plus className="h-3 w-3 mr-1" />
                     {t('common.addCommand')}
@@ -771,7 +771,7 @@ export const HooksEditor: React.FC<HooksEditorProps> = ({
                       variant="outline"
                       size="sm"
                       onClick={() => setShowTemplateDialog(true)}
-                      className="hover:!text-gray-400 dark:hover:!text-gray-300"
+                      className="hover:!text-gray-400 dark:hover:!text-gray-300 hover:bg-gray-500/10"
                     >
                       <FileText className="h-4 w-4 mr-2" />
                       {t('common.templates')}
@@ -870,7 +870,7 @@ export const HooksEditor: React.FC<HooksEditorProps> = ({
                       {!readOnly && (
                         <Button
                           onClick={() => isMatcherEvent ? addMatcher(event) : addDirectCommand(event)}
-                          className='hover:!text-gray-400 dark:hover:!text-gray-300'
+                          className='hover:!text-gray-400 dark:hover:!text-gray-300 hover:bg-gray-500/10'
                         >
                           <Plus className="h-4 w-4 mr-2" />
                           {t('common.addHook')}
@@ -888,7 +888,7 @@ export const HooksEditor: React.FC<HooksEditorProps> = ({
                         <Button
                           variant="outline"
                           onClick={() => isMatcherEvent ? addMatcher(event) : addDirectCommand(event)}
-                          className="w-full hover:!text-gray-400 dark:hover:!text-gray-300"
+                          className="w-full hover:!text-gray-400 dark:hover:!text-gray-300 hover:bg-gray-500/10"
                         >
                           <Plus className="h-4 w-4 mr-2" />
                           {t('common.addAnother')} {isMatcherEvent ? t('common.matcher') : t('common.command')}

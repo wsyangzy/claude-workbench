@@ -551,7 +551,7 @@ const AddStationDialog: React.FC<AddStationDialogProps> = ({
             <Button
               type="submit"
               disabled={loading}
-              className='hover:!text-gray-400 dark:hover:!text-gray-300'
+              className='hover:!text-gray-400 dark:hover:!text-gray-300 hover:bg-gray-500/10'
             >
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {editMode ? '保存更改' : '添加站点'}
@@ -1608,7 +1608,7 @@ const StationDetailView: React.FC<DetailViewProps> = ({ station, onBack, onStati
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground mb-4">{error}</p>
-              <Button onClick={loadBasicData} variant="outline">
+              <Button onClick={loadBasicData} variant="outline" className="hover:!text-gray-400 dark:hover:!text-gray-300 hover:bg-gray-500/10">
                 重试
               </Button>
             </CardContent>
@@ -2826,29 +2826,6 @@ const RelayStationManager: React.FC<RelayStationManagerProps> = ({ onBack }) => 
     }
   };
 
-  // 检查自定义中转站是否被应用
-  const isCustomStationApplied = (station: RelayStation): boolean => {
-    if (station.adapter !== 'custom') return false;
-    
-    // 首先检查配置使用状态记录是否与当前配置匹配
-    const usageStatus = configUsageStatus.find(status => 
-      status.station_id === station.id && 
-      status.is_active &&
-      status.base_url === currentProviderConfig?.anthropic_base_url &&
-      status.token === currentProviderConfig?.anthropic_auth_token
-    );
-    
-    if (usageStatus) {
-      return true;
-    }
-    
-    // 如果没有匹配的使用状态记录，回退到配置比较
-    if (!currentProviderConfig) return false;
-    const baseUrlMatches = currentProviderConfig.anthropic_base_url === station.api_url;
-    const authTokenMatches = currentProviderConfig.anthropic_auth_token === station.system_token;
-    
-    return baseUrlMatches && authTokenMatches;
-  };
 
   // 获取当前应用的配置信息用于显示
   const getAppliedConfigInfo = (): { station?: RelayStation; baseUrl?: string; partialKey?: string } | null => {
@@ -2965,7 +2942,7 @@ const RelayStationManager: React.FC<RelayStationManagerProps> = ({ onBack }) => 
             size="sm"
             onClick={() => handleExportStations()}
             disabled={isExporting || stations.length === 0}
-            className="text-xs hover:!text-gray-400 dark:hover:!text-gray-300"
+            className="text-xs hover:!text-gray-400 dark:hover:!text-gray-300 hover:bg-gray-500/10"
           >
             {isExporting ? (
               <Loader2 className="h-3 w-3 mr-1 animate-spin" />
@@ -2979,7 +2956,7 @@ const RelayStationManager: React.FC<RelayStationManagerProps> = ({ onBack }) => 
             size="sm"
             onClick={handleImportStations}
             disabled={isImporting}
-            className="text-xs hover:!text-gray-400 dark:hover:!text-gray-300"
+            className="text-xs hover:!text-gray-400 dark:hover:!text-gray-300 hover:bg-gray-500/10"
           >
             {isImporting ? (
               <Loader2 className="h-3 w-3 mr-1 animate-spin" />
@@ -2992,7 +2969,7 @@ const RelayStationManager: React.FC<RelayStationManagerProps> = ({ onBack }) => 
             variant="outline"
             onClick={() => setShowAddDialog(true)}
             size="sm"
-            className="text-xs hover:!text-gray-400 dark:hover:!text-gray-300"
+            className="text-xs hover:!text-gray-400 dark:hover:!text-gray-300 hover:bg-gray-500/10"
           >
             <Plus className="h-3 w-3 mr-1" />
             {t('relayStations.addStationDialog.title')}
@@ -3055,7 +3032,7 @@ const RelayStationManager: React.FC<RelayStationManagerProps> = ({ onBack }) => 
                   <Button
                     onClick={() => setShowAddDialog(true)}
                     size="sm"
-                    className="hover:!text-gray-400 dark:hover:!text-gray-300"
+                    className="hover:!text-gray-400 dark:hover:!text-gray-300 hover:bg-gray-500/10"
                   >
                   <Plus className="h-4 w-4 mr-2" />
                   添加第一个中转站
@@ -3099,7 +3076,7 @@ const RelayStationManager: React.FC<RelayStationManagerProps> = ({ onBack }) => 
                       variant="outline"
                       size="sm"
                       onClick={() => handleApplyStationFromList(station)}
-                      className="text-xs"
+                      className="text-xs hover:text-green-700 hover:bg-green-500/10 hover:text-green-600"
                     >
                       <PlayCircle className="h-3 w-3" />
                     </Button>
@@ -3108,7 +3085,7 @@ const RelayStationManager: React.FC<RelayStationManagerProps> = ({ onBack }) => 
                       variant="outline"
                       size="sm"
                       onClick={() => handleEditStation(station)}
-                      className="text-xs"
+                      className="text-xs hover:text-gray-700 hover:bg-gray-500/10 hover:text-gray-600"
                     >
                       <Edit className="h-3 w-3" />
                     </Button>
@@ -3125,7 +3102,7 @@ const RelayStationManager: React.FC<RelayStationManagerProps> = ({ onBack }) => 
                     <Button
                       size="sm"
                       onClick={() => handleStationClick(station)}
-                      className="text-xs"
+                      className="text-xs hover:text-gray-700 hover:bg-gray-500/10 hover:text-gray-600"
                     >
                       <ChevronRight className="h-3 w-3 mr-1" />
                       查看详情
@@ -3167,6 +3144,7 @@ const RelayStationManager: React.FC<RelayStationManagerProps> = ({ onBack }) => 
             <Button
               variant="outline"
               onClick={() => setShowDeleteDialog(false)}
+              className='hover:bg-gray-500/10 hover:text-gray-600'
             >
               取消
             </Button>
@@ -3274,14 +3252,14 @@ const RelayStationManager: React.FC<RelayStationManagerProps> = ({ onBack }) => 
                 setOverwriteExisting(false);
               }}
               disabled={isImporting}
-              className='hover:!text-red-600'
+              className='hover:text-red-700 hover:bg-red-500/10 hover:text-red-600'
             >
               取消
             </Button>
             <Button
               onClick={confirmImportStations}
               disabled={isImporting || !importData}
-              className='hover:!text-gray-400 dark:hover:!text-gray-300'
+              className='hover:!text-gray-400 dark:hover:!text-gray-300 hover:bg-gray-500/10'
             >
               {isImporting ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
