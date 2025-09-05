@@ -67,3 +67,6 @@ playwright-report/
 playwright/.cache/
 /.github
 /.cunzhi-memory
+.bmad-core
+.claude/commands/BMad
+docs/

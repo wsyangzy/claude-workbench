@@ -145,7 +145,7 @@ bun run tauri build
 
 ## 🙏 致谢
 
-特别感谢原项目 [@getAsterisk/claudia](https://github.com/getAsterisk/claudia) 提供的基础架构和灵感。本项目基于该项目进行了 Windows 专版的深度定制和优化。
+特别感谢原项目 [@getAsterisk/claudia](https://github.com/getAsterisk/claudia) 以及 [@anyme123/claude-workbench](https://github.com/anyme123/claude-workbench) 、[@xinhai-ai/claude-suite](https://github.com/xinhai-ai/claude-suite) 提供的基础架构和灵感。本项目基于该项目进行了 Windows 专版的深度定制和优化。
 
 - [Claude](https://claude.ai/) - 强大的 AI 助手
 - [Tauri](https://tauri.app/) - 现代化的桌面应用框架  
