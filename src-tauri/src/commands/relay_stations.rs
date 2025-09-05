@@ -992,10 +992,10 @@ impl RelayStationManager {
 #[tauri::command]
 pub async fn list_relay_stations(app: AppHandle) -> Result<Vec<RelayStation>, String> {
     let state: State<Mutex<Option<RelayStationManager>>> = app.state();
-    let manager_lock = state.lock().map_err(|e| t!("relay.lock_error", "error" => &e.to_string()))?;
+    let manager_lock = state.lock().map_err(|_e| t!("relay.lock_error", "error" => &_e.to_string()))?;
     
     if let Some(manager) = manager_lock.as_ref() {
-        manager.list_stations().map_err(|e| t!("relay.failed_to_list_stations", "error" => &e.to_string()))
+        manager.list_stations().map_err(|_e| t!("relay.failed_to_list_stations", "error" => &_e.to_string()))
     } else {
         Ok(Vec::new()) // Return empty list if manager not initialized
     }
@@ -1004,10 +1004,10 @@ pub async fn list_relay_stations(app: AppHandle) -> Result<Vec<RelayStation>, St
 #[tauri::command]
 pub async fn get_relay_station(station_id: String, app: AppHandle) -> Result<Option<RelayStation>, String> {
     let state: State<Mutex<Option<RelayStationManager>>> = app.state();
-    let manager_lock = state.lock().map_err(|e| t!("relay.lock_error", "error" => &e.to_string()))?;
+    let manager_lock = state.lock().map_err(|_e| t!("relay.lock_error", "error" => &_e.to_string()))?;
     
     if let Some(manager) = manager_lock.as_ref() {
-        manager.get_station(&station_id).map_err(|e| t!("relay.failed_to_get_station", "error" => &e.to_string()))
+        manager.get_station(&station_id).map_err(|_e| t!("relay.failed_to_get_station", "error" => &_e.to_string()))
     } else {
         Ok(None)
     }
@@ -1019,7 +1019,7 @@ pub async fn add_relay_station(
     app: AppHandle,
 ) -> Result<String, String> {
     let state: State<Mutex<Option<RelayStationManager>>> = app.state();
-    let manager_lock = state.lock().map_err(|e| t!("relay.lock_error", "error" => &e.to_string()))?;
+    let manager_lock = state.lock().map_err(|_e| t!("relay.lock_error", "error" => &_e.to_string()))?;
     
     if let Some(manager) = manager_lock.as_ref() {
         let station = RelayStation {
@@ -1037,7 +1037,7 @@ pub async fn add_relay_station(
             updated_at: Utc::now().timestamp(),
         };
         
-        manager.add_station(&station).map_err(|e| t!("relay.failed_to_add_station", "error" => &e.to_string()))?;
+        manager.add_station(&station).map_err(|_e| t!("relay.failed_to_add_station", "error" => &_e.to_string()))?;
         Ok(t!("relay.station_add_success"))
     } else {
         Err(t!("relay.manager_not_initialized"))
@@ -1051,10 +1051,10 @@ pub async fn update_relay_station(
     app: AppHandle,
 ) -> Result<String, String> {
     let state: State<Mutex<Option<RelayStationManager>>> = app.state();
-    let manager_lock = state.lock().map_err(|e| t!("relay.lock_error", "error" => &e.to_string()))?;
+    let manager_lock = state.lock().map_err(|_e| t!("relay.lock_error", "error" => &_e.to_string()))?;
     
     if let Some(manager) = manager_lock.as_ref() {
-        manager.update_station(&station_id, &updates).map_err(|e| t!("relay.failed_to_update_station", "error" => &e.to_string()))?;
+        manager.update_station(&station_id, &updates).map_err(|_e| t!("relay.failed_to_update_station", "error" => &_e.to_string()))?;
         Ok(t!("relay.station_update_success"))
     } else {
         Err(t!("relay.manager_not_initialized"))
@@ -1064,10 +1064,10 @@ pub async fn update_relay_station(
 #[tauri::command]
 pub async fn delete_relay_station(station_id: String, app: AppHandle) -> Result<String, String> {
     let state: State<Mutex<Option<RelayStationManager>>> = app.state();
-    let manager_lock = state.lock().map_err(|e| t!("relay.lock_error", "error" => &e.to_string()))?;
+    let manager_lock = state.lock().map_err(|_e| t!("relay.lock_error", "error" => &_e.to_string()))?;
     
     if let Some(manager) = manager_lock.as_ref() {
-        manager.delete_station(&station_id).map_err(|e| t!("relay.failed_to_delete_station", "error" => &e.to_string()))?;
+        manager.delete_station(&station_id).map_err(|_e| t!("relay.failed_to_delete_station", "error" => &_e.to_string()))?;
         Ok(t!("relay.station_delete_success"))
     } else {
         Err(t!("relay.manager_not_initialized"))
@@ -1080,9 +1080,9 @@ pub async fn get_station_info(station_id: String, app: AppHandle) -> Result<Stat
     
     // Get the station first, releasing the lock before the async call
     let station = {
-        let manager_lock = state.lock().map_err(|e| t!("relay.lock_error", "error" => &e.to_string()))?;
+        let manager_lock = state.lock().map_err(|_e| t!("relay.lock_error", "error" => &_e.to_string()))?;
         if let Some(manager) = manager_lock.as_ref() {
-            manager.get_station(&station_id).map_err(|e| t!("relay.failed_to_get_station", "error" => &e.to_string()))?
+            manager.get_station(&station_id).map_err(|_e| t!("relay.failed_to_get_station", "error" => &_e.to_string()))?
         } else {
             return Err(t!("relay.manager_not_initialized"));
         }
@@ -1090,7 +1090,7 @@ pub async fn get_station_info(station_id: String, app: AppHandle) -> Result<Stat
     
     if let Some(station) = station {
         let adapter = create_adapter(&station.adapter);
-        adapter.get_station_info(&station).await.map_err(|e| t!("relay.failed_to_get_station_info", "error" => &e.to_string()))
+        adapter.get_station_info(&station).await.map_err(|_e| t!("relay.failed_to_get_station_info", "error" => &_e.to_string()))
     } else {
         Err(t!("relay.station_not_found"))
     }
@@ -1102,9 +1102,9 @@ pub async fn list_station_tokens(station_id: String, page: Option<usize>, size: 
     
     // Get the station first, releasing the lock before the async call
     let station = {
-        let manager_lock = state.lock().map_err(|e| t!("relay.lock_error", "error" => &e.to_string()))?;
+        let manager_lock = state.lock().map_err(|_e| t!("relay.lock_error", "error" => &_e.to_string()))?;
         if let Some(manager) = manager_lock.as_ref() {
-            manager.get_station(&station_id).map_err(|e| t!("relay.failed_to_get_station", "error" => &e.to_string()))?
+            manager.get_station(&station_id).map_err(|_e| t!("relay.failed_to_get_station", "error" => &_e.to_string()))?
         } else {
             return Ok(TokenPaginationResponse {
                 items: Vec::new(),
@@ -1117,7 +1117,7 @@ pub async fn list_station_tokens(station_id: String, page: Option<usize>, size: 
     
     if let Some(station) = station {
         let adapter = create_adapter(&station.adapter);
-        adapter.list_tokens(&station, page, size).await.map_err(|e| t!("relay.failed_to_list_tokens", "error" => &e.to_string()))
+        adapter.list_tokens(&station, page, size).await.map_err(|_e| t!("relay.failed_to_list_tokens", "error" => &_e.to_string()))
     } else {
         Ok(TokenPaginationResponse {
             items: Vec::new(),
@@ -1138,9 +1138,9 @@ pub async fn add_station_token(
     
     // Get the station first, releasing the lock before the async call
     let station = {
-        let manager_lock = state.lock().map_err(|e| t!("relay.lock_error", "error" => &e.to_string()))?;
+        let manager_lock = state.lock().map_err(|_e| t!("relay.lock_error", "error" => &_e.to_string()))?;
         if let Some(manager) = manager_lock.as_ref() {
-            manager.get_station(&station_id).map_err(|e| t!("relay.failed_to_get_station", "error" => &e.to_string()))?
+            manager.get_station(&station_id).map_err(|_e| t!("relay.failed_to_get_station", "error" => &_e.to_string()))?
         } else {
             return Err(t!("relay.manager_not_initialized"));
         }
@@ -1148,7 +1148,7 @@ pub async fn add_station_token(
     
     if let Some(station) = station {
         let adapter = create_adapter(&station.adapter);
-        adapter.create_token(&station, &token_data).await.map_err(|e| t!("relay.failed_to_create_token", "error" => &e.to_string()))
+        adapter.create_token(&station, &token_data).await.map_err(|_e| t!("relay.failed_to_create_token", "error" => &_e.to_string()))
     } else {
         Err(t!("relay.station_not_found"))
     }
@@ -1165,9 +1165,9 @@ pub async fn update_station_token(
     
     // Get the station first, releasing the lock before the async call
     let station = {
-        let manager_lock = state.lock().map_err(|e| t!("relay.lock_error", "error" => &e.to_string()))?;
+        let manager_lock = state.lock().map_err(|_e| t!("relay.lock_error", "error" => &_e.to_string()))?;
         if let Some(manager) = manager_lock.as_ref() {
-            manager.get_station(&station_id).map_err(|e| t!("relay.failed_to_get_station", "error" => &e.to_string()))?
+            manager.get_station(&station_id).map_err(|_e| t!("relay.failed_to_get_station", "error" => &_e.to_string()))?
         } else {
             return Err(t!("relay.manager_not_initialized"));
         }
@@ -1175,7 +1175,7 @@ pub async fn update_station_token(
     
     if let Some(station) = station {
         let adapter = create_adapter(&station.adapter);
-        adapter.update_token(&station, &token_id, &token_data).await.map_err(|e| t!("relay.failed_to_update_token", "error" => &e.to_string()))
+        adapter.update_token(&station, &token_id, &token_data).await.map_err(|_e| t!("relay.failed_to_update_token", "error" => &_e.to_string()))
     } else {
         Err(t!("relay.station_not_found"))
     }
@@ -1191,9 +1191,9 @@ pub async fn delete_station_token(
     
     // Get the station first, releasing the lock before the async call
     let station = {
-        let manager_lock = state.lock().map_err(|e| t!("relay.lock_error", "error" => &e.to_string()))?;
+        let manager_lock = state.lock().map_err(|_e| t!("relay.lock_error", "error" => &_e.to_string()))?;
         if let Some(manager) = manager_lock.as_ref() {
-            manager.get_station(&station_id).map_err(|e| t!("relay.failed_to_get_station", "error" => &e.to_string()))?
+            manager.get_station(&station_id).map_err(|_e| t!("relay.failed_to_get_station", "error" => &_e.to_string()))?
         } else {
             return Err(t!("relay.manager_not_initialized"));
         }
@@ -1201,7 +1201,7 @@ pub async fn delete_station_token(
     
     if let Some(station) = station {
         let adapter = create_adapter(&station.adapter);
-        adapter.delete_token(&station, &token_id).await.map_err(|e| t!("relay.failed_to_delete_token", "error" => &e.to_string()))?;
+        adapter.delete_token(&station, &token_id).await.map_err(|_e| t!("relay.failed_to_delete_token", "error" => &_e.to_string()))?;
         Ok(t!("relay.token_delete_success"))
     } else {
         Err(t!("relay.station_not_found"))
@@ -1218,9 +1218,9 @@ pub async fn get_token_user_info(
     
     // Get station data first, releasing the lock before async call
     let station = {
-        let manager_lock = state.lock().map_err(|e| t!("relay.lock_error", "error" => &e.to_string()))?;
+        let manager_lock = state.lock().map_err(|_e| t!("relay.lock_error", "error" => &_e.to_string()))?;
         if let Some(manager) = manager_lock.as_ref() {
-            manager.get_station(&station_id).map_err(|e| t!("relay.failed_to_get_station", "error" => &e.to_string()))?
+            manager.get_station(&station_id).map_err(|_e| t!("relay.failed_to_get_station", "error" => &_e.to_string()))?
         } else {
             return Err(t!("relay.manager_not_initialized"));
         }
@@ -1229,7 +1229,7 @@ pub async fn get_token_user_info(
     if let Some(station) = station {
         let adapter = create_adapter(&station.adapter);
         // Use the provided user_id directly (from station configuration)
-        adapter.get_user_info(&station, &user_id).await.map_err(|e| t!("relay.failed_to_get_user_info", "error" => &e.to_string()))
+        adapter.get_user_info(&station, &user_id).await.map_err(|_e| t!("relay.failed_to_get_user_info", "error" => &_e.to_string()))
     } else {
         Err(t!("relay.station_not_found"))
     }
@@ -1247,9 +1247,9 @@ pub async fn get_station_logs(
     
     // Get the station first, releasing the lock before the async call
     let station = {
-        let manager_lock = state.lock().map_err(|e| t!("relay.lock_error", "error" => &e.to_string()))?;
+        let manager_lock = state.lock().map_err(|_e| t!("relay.lock_error", "error" => &_e.to_string()))?;
         if let Some(manager) = manager_lock.as_ref() {
-            manager.get_station(&station_id).map_err(|e| t!("relay.failed_to_get_station", "error" => &e.to_string()))?
+            manager.get_station(&station_id).map_err(|_e| t!("relay.failed_to_get_station", "error" => &_e.to_string()))?
         } else {
             return Err(t!("relay.manager_not_initialized"));
         }
@@ -1257,7 +1257,7 @@ pub async fn get_station_logs(
     
     if let Some(station) = station {
         let adapter = create_adapter(&station.adapter);
-        adapter.get_logs(&station, page, page_size, filters).await.map_err(|e| t!("relay.failed_to_get_logs", "error" => &e.to_string()))
+        adapter.get_logs(&station, page, page_size, filters).await.map_err(|_e| t!("relay.failed_to_get_logs", "error" => &_e.to_string()))
     } else {
         Err(t!("relay.station_not_found"))
     }
@@ -1269,9 +1269,9 @@ pub async fn test_station_connection(station_id: String, app: AppHandle) -> Resu
     
     // Get the station first, releasing the lock before the async call
     let station = {
-        let manager_lock = state.lock().map_err(|e| t!("relay.lock_error", "error" => &e.to_string()))?;
+        let manager_lock = state.lock().map_err(|_e| t!("relay.lock_error", "error" => &_e.to_string()))?;
         if let Some(manager) = manager_lock.as_ref() {
-            manager.get_station(&station_id).map_err(|e| t!("relay.failed_to_get_station", "error" => &e.to_string()))?
+            manager.get_station(&station_id).map_err(|_e| t!("relay.failed_to_get_station", "error" => &_e.to_string()))?
         } else {
             return Err(t!("relay.manager_not_initialized"));
         }
@@ -1279,7 +1279,7 @@ pub async fn test_station_connection(station_id: String, app: AppHandle) -> Resu
     
     if let Some(station) = station {
         let adapter = create_adapter(&station.adapter);
-        adapter.test_connection(&station).await.map_err(|e| t!("relay.failed_to_test_connection", "error" => &e.to_string()))
+        adapter.test_connection(&station).await.map_err(|_e| t!("relay.failed_to_test_connection", "error" => &_e.to_string()))
     } else {
         Err(t!("relay.station_not_found"))
     }
@@ -1291,9 +1291,9 @@ pub async fn api_user_self_groups(station_id: String, app: AppHandle) -> Result<
     
     // Get the station first, releasing the lock before the async call
     let station = {
-        let manager_lock = state.lock().map_err(|e| t!("relay.lock_error", "error" => &e.to_string()))?;
+        let manager_lock = state.lock().map_err(|_e| t!("relay.lock_error", "error" => &_e.to_string()))?;
         if let Some(manager) = manager_lock.as_ref() {
-            manager.get_station(&station_id).map_err(|e| t!("relay.failed_to_get_station", "error" => &e.to_string()))?
+            manager.get_station(&station_id).map_err(|_e| t!("relay.failed_to_get_station", "error" => &_e.to_string()))?
         } else {
             return Err(t!("relay.manager_not_initialized"));
         }
@@ -1301,7 +1301,7 @@ pub async fn api_user_self_groups(station_id: String, app: AppHandle) -> Result<
     
     if let Some(station) = station {
         let adapter = create_adapter(&station.adapter);
-        adapter.get_user_groups(&station).await.map_err(|e| t!("relay.failed_to_get_user_groups", "error" => &e.to_string()))
+        adapter.get_user_groups(&station).await.map_err(|_e| t!("relay.failed_to_get_user_groups", "error" => &_e.to_string()))
     } else {
         Err(t!("relay.station_not_found"))
     }
@@ -1318,9 +1318,9 @@ pub async fn toggle_station_token(
     
     // Get the station first, releasing the lock before the async call
     let station = {
-        let manager_lock = state.lock().map_err(|e| t!("relay.lock_error", "error" => &e.to_string()))?;
+        let manager_lock = state.lock().map_err(|_e| t!("relay.lock_error", "error" => &_e.to_string()))?;
         if let Some(manager) = manager_lock.as_ref() {
-            manager.get_station(&station_id).map_err(|e| t!("relay.failed_to_get_station", "error" => &e.to_string()))?
+            manager.get_station(&station_id).map_err(|_e| t!("relay.failed_to_get_station", "error" => &_e.to_string()))?
         } else {
             return Err(t!("relay.manager_not_initialized"));
         }
@@ -1328,7 +1328,7 @@ pub async fn toggle_station_token(
     
     if let Some(station) = station {
         let adapter = create_adapter(&station.adapter);
-        adapter.toggle_token(&station, &token_id, enabled).await.map_err(|e| t!("relay.failed_to_toggle_token", "error" => &e.to_string()))
+        adapter.toggle_token(&station, &token_id, enabled).await.map_err(|_e| t!("relay.failed_to_toggle_token", "error" => &_e.to_string()))
     } else {
         Err(t!("relay.station_not_found"))
     }
@@ -1344,9 +1344,9 @@ pub async fn load_station_api_endpoints(
     
     // Get the station first
     let station = {
-        let manager_lock = state.lock().map_err(|e| t!("relay.lock_error", "error" => &e.to_string()))?;
+        let manager_lock = state.lock().map_err(|_e| t!("relay.lock_error", "error" => &_e.to_string()))?;
         if let Some(manager) = manager_lock.as_ref() {
-            manager.get_station(&station_id).map_err(|e| t!("relay.failed_to_get_station", "error" => &e.to_string()))?
+            manager.get_station(&station_id).map_err(|_e| t!("relay.failed_to_get_station", "error" => &_e.to_string()))?
         } else {
             return Err(t!("relay.manager_not_initialized"));
         }
@@ -1415,9 +1415,9 @@ pub async fn save_station_config(
     
     // Get the station first
     let station = {
-        let manager_lock = state.lock().map_err(|e| t!("relay.lock_error", "error" => &e.to_string()))?;
+        let manager_lock = state.lock().map_err(|_e| t!("relay.lock_error", "error" => &_e.to_string()))?;
         if let Some(manager) = manager_lock.as_ref() {
-            manager.get_station(&config_request.station_id).map_err(|e| t!("relay.failed_to_get_station", "error" => &e.to_string()))?
+            manager.get_station(&config_request.station_id).map_err(|_e| t!("relay.failed_to_get_station", "error" => &_e.to_string()))?
         } else {
             return Err(t!("relay.manager_not_initialized"));
         }
@@ -1440,9 +1440,9 @@ pub async fn save_station_config(
         
         // Save to database
         {
-            let mut manager_lock = state.lock().map_err(|e| t!("relay.lock_error", "error" => &e.to_string()))?;
+            let mut manager_lock = state.lock().map_err(|_e| t!("relay.lock_error", "error" => &_e.to_string()))?;
             if let Some(manager) = manager_lock.as_mut() {
-                manager.save_station_config(&config).map_err(|e| t!("relay.failed_to_save_config", "error" => &e.to_string()))?;
+                manager.save_station_config(&config).map_err(|_e| t!("relay.failed_to_save_config", "error" => &_e.to_string()))?;
             }
         }
         
@@ -1460,9 +1460,9 @@ pub async fn get_station_config(
 ) -> Result<Option<RelayStationConfig>, String> {
     let state: State<Mutex<Option<RelayStationManager>>> = app.state();
     
-    let manager_lock = state.lock().map_err(|e| t!("relay.lock_error", "error" => &e.to_string()))?;
+    let manager_lock = state.lock().map_err(|_e| t!("relay.lock_error", "error" => &_e.to_string()))?;
     if let Some(manager) = manager_lock.as_ref() {
-        manager.get_station_config(&station_id).map_err(|e| t!("relay.failed_to_get_config", "error" => &e.to_string()))
+        manager.get_station_config(&station_id).map_err(|_e| t!("relay.failed_to_get_config", "error" => &_e.to_string()))
     } else {
         Err(t!("relay.manager_not_initialized"))
     }
@@ -1473,9 +1473,9 @@ pub async fn get_station_config(
 pub async fn get_config_usage_status(app: AppHandle) -> Result<Vec<ConfigUsageStatus>, String> {
     let state: State<Mutex<Option<RelayStationManager>>> = app.state();
     
-    let manager_lock = state.lock().map_err(|e| t!("relay.lock_error", "error" => &e.to_string()))?;
+    let manager_lock = state.lock().map_err(|_e| t!("relay.lock_error", "error" => &_e.to_string()))?;
     if let Some(manager) = manager_lock.as_ref() {
-        manager.get_config_usage_status().map_err(|e| t!("relay.failed_to_get_usage_status", "error" => &e.to_string()))
+        manager.get_config_usage_status().map_err(|_e| t!("relay.failed_to_get_usage_status", "error" => &_e.to_string()))
     } else {
         Err(t!("relay.manager_not_initialized"))
     }
@@ -1491,9 +1491,9 @@ pub async fn record_config_usage(
 ) -> Result<String, String> {
     let state: State<Mutex<Option<RelayStationManager>>> = app.state();
     
-    let mut manager_lock = state.lock().map_err(|e| t!("relay.lock_error", "error" => &e.to_string()))?;
+    let mut manager_lock = state.lock().map_err(|_e| t!("relay.lock_error", "error" => &_e.to_string()))?;
     if let Some(manager) = manager_lock.as_mut() {
-        manager.record_config_usage(&station_id, &base_url, &token).map_err(|e| t!("relay.failed_to_record_usage", "error" => &e.to_string()))?;
+        manager.record_config_usage(&station_id, &base_url, &token).map_err(|_e| t!("relay.failed_to_record_usage", "error" => &_e.to_string()))?;
         Ok(t!("relay.usage_record_updated"))
     } else {
         Err(t!("relay.manager_not_initialized"))
@@ -1507,10 +1507,10 @@ pub async fn export_relay_stations(
     app: AppHandle,
 ) -> Result<RelayStationExport, String> {
     let state: State<Mutex<Option<RelayStationManager>>> = app.state();
-    let manager_lock = state.lock().map_err(|e| t!("relay.lock_error", "error" => &e.to_string()))?;
+    let manager_lock = state.lock().map_err(|_e| t!("relay.lock_error", "error" => &_e.to_string()))?;
     
     if let Some(manager) = manager_lock.as_ref() {
-        manager.export_stations(station_ids).map_err(|e| t!("relay.failed_to_export_stations", "error" => &e.to_string()))
+        manager.export_stations(station_ids).map_err(|_e| t!("relay.failed_to_export_stations", "error" => &_e.to_string()))
     } else {
         Err(t!("relay.manager_not_initialized"))
     }
@@ -1524,10 +1524,10 @@ pub async fn import_relay_stations(
     app: AppHandle,
 ) -> Result<Vec<String>, String> {
     let state: State<Mutex<Option<RelayStationManager>>> = app.state();
-    let manager_lock = state.lock().map_err(|e| t!("relay.lock_error", "error" => &e.to_string()))?;
+    let manager_lock = state.lock().map_err(|_e| t!("relay.lock_error", "error" => &_e.to_string()))?;
     
     if let Some(manager) = manager_lock.as_ref() {
-        manager.import_stations(&export_data, overwrite_existing).map_err(|e| t!("relay.failed_to_import_stations", "error" => &e.to_string()))
+        manager.import_stations(&export_data, overwrite_existing).map_err(|_e| t!("relay.failed_to_import_stations", "error" => &_e.to_string()))
     } else {
         Err(t!("relay.manager_not_initialized"))
     }

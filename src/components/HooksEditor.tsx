@@ -49,7 +49,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import { HooksManager } from '@/lib/hooksManager';
+import { generateId, checkDangerousPatterns } from '@/lib/hooksUtils';
 import { api } from '@/lib/api';
 import { useTranslation } from "@/hooks/useTranslation";
 import {
@@ -156,11 +156,11 @@ export const HooksEditor: React.FC<HooksEditorProps> = ({
       if (matchers && Array.isArray(matchers)) {
         result[event] = matchers.map(matcher => ({
           ...matcher,
-          id: HooksManager.generateId(),
+          id: generateId(),
           expanded: false,
           hooks: (matcher.hooks || []).map(hook => ({
             ...hook,
-            id: HooksManager.generateId()
+            id: generateId()
           }))
         }));
       }
@@ -172,7 +172,7 @@ export const HooksEditor: React.FC<HooksEditorProps> = ({
       if (commands && Array.isArray(commands)) {
         result[event] = commands.map(hook => ({
           ...hook,
-          id: HooksManager.generateId()
+          id: generateId()
         }));
       }
     });
@@ -226,11 +226,11 @@ export const HooksEditor: React.FC<HooksEditorProps> = ({
       if (matchers && Array.isArray(matchers)) {
         result[event] = matchers.map(matcher => ({
           ...matcher,
-          id: HooksManager.generateId(),
+          id: generateId(),
           expanded: false,
           hooks: (matcher.hooks || []).map(hook => ({
             ...hook,
-            id: HooksManager.generateId()
+            id: generateId()
           }))
         }));
       }
@@ -242,7 +242,7 @@ export const HooksEditor: React.FC<HooksEditorProps> = ({
       if (commands && Array.isArray(commands)) {
         result[event] = commands.map(hook => ({
           ...hook,
-          id: HooksManager.generateId()
+          id: generateId()
         }));
       }
     });
@@ -336,7 +336,7 @@ export const HooksEditor: React.FC<HooksEditorProps> = ({
     if (!matcherEvents.includes(event as any)) return;
     
     const newMatcher: EditableHookMatcher = {
-      id: HooksManager.generateId(),
+      id: generateId(),
       matcher: '',
       hooks: [],
       expanded: true
@@ -353,7 +353,7 @@ export const HooksEditor: React.FC<HooksEditorProps> = ({
     if (!directEvents.includes(event as any)) return;
     
     const newCommand: EditableHookCommand = {
-      id: HooksManager.generateId(),
+      id: generateId(),
       type: 'command',
       command: ''
     };
@@ -408,10 +408,10 @@ export const HooksEditor: React.FC<HooksEditorProps> = ({
     if (matcherEvents.includes(template.event as any)) {
       // For events with matchers
       const newMatcher: EditableHookMatcher = {
-        id: HooksManager.generateId(),
+        id: generateId(),
         matcher: template.matcher,
         hooks: template.commands.map(cmd => ({
-          id: HooksManager.generateId(),
+          id: generateId(),
           type: 'command' as const,
           command: cmd
         })),
@@ -425,7 +425,7 @@ export const HooksEditor: React.FC<HooksEditorProps> = ({
     } else {
       // For direct events
       const newCommands: EditableHookCommand[] = template.commands.map(cmd => ({
-        id: HooksManager.generateId(),
+        id: generateId(),
         type: 'command' as const,
         command: cmd
       }));
@@ -447,6 +447,7 @@ export const HooksEditor: React.FC<HooksEditorProps> = ({
       return;
     }
     
+    const { HooksManager } = await import('@/lib/hooksManager');
     const result = await HooksManager.validateConfig(hooks);
     setValidationErrors(result.errors.map(e => e.message));
     setValidationWarnings(result.warnings.map(w => `${w.message} in command: ${(w.command || '').substring(0, 50)}...`));
@@ -460,7 +461,7 @@ export const HooksEditor: React.FC<HooksEditorProps> = ({
     if (!matcherEvents.includes(event as any)) return;
     
     const newCommand: EditableHookCommand = {
-      id: HooksManager.generateId(),
+      id: generateId(),
       type: 'command',
       command: ''
     };
@@ -654,7 +655,7 @@ export const HooksEditor: React.FC<HooksEditorProps> = ({
                       
                       {/* Show warnings for this command */}
                       {(() => {
-                        const warnings = HooksManager.checkDangerousPatterns(hook.command || '');
+                        const warnings = checkDangerousPatterns(hook.command || '');
                         return warnings.length > 0 && (
                           <div className="flex items-start gap-2 p-2 bg-yellow-500/10 rounded-md">
                             <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5" />
@@ -721,7 +722,7 @@ export const HooksEditor: React.FC<HooksEditorProps> = ({
       
       {/* Show warnings for this command */}
       {(() => {
-        const warnings = HooksManager.checkDangerousPatterns(command.command || '');
+        const warnings = checkDangerousPatterns(command.command || '');
         return warnings.length > 0 && (
           <div className="flex items-start gap-2 p-2 bg-yellow-500/10 rounded-md">
             <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5" />
