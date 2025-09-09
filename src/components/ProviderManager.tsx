@@ -20,12 +20,14 @@ import {
 import { api, type ProviderConfig, type CurrentProviderConfig } from '@/lib/api';
 import { Toast } from '@/components/ui/toast';
 import ProviderForm from './ProviderForm';
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface ProviderManagerProps {
   onBack: () => void;
 }
 
 export default function ProviderManager({ onBack }: ProviderManagerProps) {
+  const { t } = useTranslation();
   const [presets, setPresets] = useState<ProviderConfig[]>([]);
   const [currentConfig, setCurrentConfig] = useState<CurrentProviderConfig | null>(null);
   const [currentProviderId, setCurrentProviderId] = useState<string | null>(null);
@@ -58,7 +60,7 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
       setCurrentProviderId(providerIdData);
     } catch (error) {
       console.error('Failed to load provider data:', error);
-      setToastMessage({ message: '加载代理商配置失败', type: 'error' });
+      setToastMessage({ message: t("loadProviderConfigFailed"), type: 'error' });
     } finally {
       setLoading(false);
     }
@@ -76,7 +78,7 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
       
     } catch (error) {
       console.error('Failed to switch provider:', error);
-      setToastMessage({ message: '切换代理商失败', type: 'error' });
+      setToastMessage({ message: t("common.switchProviderFailed"), type: 'error' });
     } finally {
       setSwitching(null);
     }
@@ -94,7 +96,7 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
       
     } catch (error) {
       console.error('Failed to clear provider:', error);
-      setToastMessage({ message: '清理配置失败', type: 'error' });
+      setToastMessage({ message: t("common.clearConfigFailed"), type: 'error' });
     } finally {
       setSwitching(null);
     }
@@ -107,7 +109,7 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
       setToastMessage({ message, type: 'success' });
     } catch (error) {
       console.error('Failed to test connection:', error);
-      setToastMessage({ message: '连接测试失败', type: 'error' });
+      setToastMessage({ message: t("common.connectionTestFailed"), type: 'error' });
     } finally {
       setTesting(null);
     }
@@ -135,11 +137,11 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
     try {
       setDeleting(providerToDelete.id);
       await api.deleteProviderConfig(providerToDelete.id);
-      setToastMessage({ message: '代理商删除成功', type: 'success' });
+      setToastMessage({ message: t("common.providerDeleteSuccess") , type: 'success' });
       await loadData();
     } catch (error) {
       console.error('Failed to delete provider:', error);
-      setToastMessage({ message: '删除代理商失败', type: 'error' });
+      setToastMessage({ message: t("common.deleteProviderFailed"), type: 'error' });
     } finally {
       setDeleting(null);
       setShowDeleteDialog(false);
@@ -162,17 +164,17 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
     try {
       if (editingProvider) {
         await api.updateProviderConfig({ ...formData, id: editingProvider.id });
-        setToastMessage({ message: '代理商更新成功', type: 'success' });
+        setToastMessage({ message: t("common.providerUpdateSuccess"), type: 'success' });
       } else {
         await api.addProviderConfig(formData);
-        setToastMessage({ message: '代理商添加成功', type: 'success' });
+        setToastMessage({ message: t("common.providerAddSuccess"), type: 'success' });
       }
       setShowForm(false);
       setEditingProvider(null);
       await loadData();
     } catch (error) {
       console.error('Failed to save provider:', error);
-      setToastMessage({ message: editingProvider ? '更新代理商失败' : '添加代理商失败', type: 'error' });
+      setToastMessage({ message: editingProvider ? t("common.updateProviderFailed") : t("common.addProviderFailed"), type: 'error' });
     }
   };
 
@@ -205,7 +207,7 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
           <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground mx-auto mb-4" />
-          <p className="text-sm text-muted-foreground">正在加载代理商配置...</p>
+          <p className="text-sm text-muted-foreground">{t("common.loadingProviderConfig")}</p>
         </div>
       </div>
     );
@@ -220,9 +222,9 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
             <Settings2 className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-lg font-semibold">代理商管理</h1>
+            <h1 className="text-lg font-semibold">{t("common.providerManager")}</h1>
             <p className="text-xs text-muted-foreground">
-              一键切换不同的 Claude API 代理商
+              {t("common.switchClaudeApiProviders")}
             </p>
           </div>
         </div>
@@ -235,7 +237,7 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
             className="text-xs hover:!text-gray-400 dark:hover:!text-gray-300 hover:bg-gray-500/10"
           >
             <Plus className="h-3 w-3 mr-1" />
-            添加代理商
+            {t("common.addProvider")}
           </Button>
           <Button
             variant="outline"
@@ -244,7 +246,7 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
             className="text-xs hover:!text-gray-400 dark:hover:!text-gray-300 hover:bg-gray-500/10"
           >
             <Eye className="h-3 w-3 mr-1" />
-            查看当前配置
+            {t("common.viewCurrentConfig")}
           </Button>
           <Button
             variant="outline"
@@ -258,7 +260,7 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
             ) : (
               <Trash2 className="h-3 w-3 mr-1" />
             )}
-            清理配置
+            {t("common.clearConfig")}
           </Button>
         </div>
       </div>
@@ -271,33 +273,33 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
             <div className="p-4 bg-muted/30 rounded-lg border">
               <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
                 <Settings2 className="h-4 w-4" />
-                当前配置状态
+                {t("common.currentConfigStatus")}
               </h3>
               <div className="space-y-2 text-sm">
                 {currentProviderId ? (
                   currentProviderId === "custom" ? (
                     <div className="flex items-center gap-2">
                       <AlertCircle className="h-4 w-4 text-orange-500" />
-                      <span className="text-orange-700">自定义配置 (未在预设列表中)</span>
+                      <span className="text-orange-700">{ t("common.customConfig") }</span>
                     </div>
                   ) : (
                     <div className="flex items-center gap-2">
                       <Check className="h-4 w-4 text-green-500" />
                       <span className="text-green-700">
-                        正在使用: {presets.find(p => p.id === currentProviderId)?.name || currentProviderId}
+                        {t("common.using")} {presets.find(p => p.id === currentProviderId)?.name || currentProviderId}
                       </span>
                     </div>
                   )
                 ) : (
                   <div className="flex items-center gap-2">
                     <AlertCircle className="h-4 w-4 text-gray-500" />
-                    <span className="text-gray-600">未配置任何代理商</span>
+                    <span className="text-gray-600">{t("common.isNoProvidersConfigured")}</span>
                   </div>
                 )}
                 
                 {currentConfig?.anthropic_base_url && (
                   <p className="text-muted-foreground">
-                    API地址: {currentConfig.anthropic_base_url}
+                    {t("common.apiAddressLabel")} {currentConfig.anthropic_base_url}
                   </p>
                 )}
               </div>
@@ -308,14 +310,14 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
                 <Globe className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-sm text-muted-foreground mb-4">还没有配置任何代理商</p>
+                <p className="text-sm text-muted-foreground mb-4">{t("common.noProvidersConfigured")}</p>
                 <Button
                   onClick={handleAddProvider}
                   size="sm"
                   className="text-xs hover:!text-gray-400 dark:hover:!text-gray-300 hover:bg-gray-500/10"
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  添加第一个代理商
+                  {t("common.addFirstProvider")}
                 </Button>
               </div>
             </div>
@@ -333,19 +335,19 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
                     {isCurrentProvider(config) && (
                       <Badge variant="secondary" className="text-xs">
                         <Check className="h-3 w-3 mr-1" />
-                        当前使用
+                        {t("common.currentlyUsed")}
                       </Badge>
                     )}
                   </div>
                   
                   <div className="space-y-1 text-sm text-muted-foreground">
-                    <p><span className="font-medium">描述：</span>{config.description}</p>
-                    <p><span className="font-medium">API地址：</span>{config.base_url}</p>
+                      <p><span className="font-medium">{t("common.description")}</span>{config.description}</p>
+                    <p><span className="font-medium">{t("common.apiAddressLabel")}</span>{config.base_url}</p>
                     {config.model && (
-                      <p><span className="font-medium">模型：</span>{config.model}</p>
+                      <p><span className="font-medium">{t("common.modelLabel")}</span>{config.model}</p>
                     )}
                     {config.small_fast_model && (
-                      <p><span className="font-medium">Haiku 类模型名称：</span>{config.small_fast_model}</p>
+                      <p><span className="font-medium">{t("common.haikuModelLabel")}</span>{config.small_fast_model}</p>
                     )}
                   </div>
                 </div>
@@ -399,7 +401,7 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
                     ) : (
                       <Check className="h-3 w-3 mr-1" />
                     )}
-                    {isCurrentProvider(config) ? '已选择' : '切换到此配置'}
+                    {isCurrentProvider(config) ? t("common.selected") : t("common.switchToConfig")}
                   </Button>
                 </div>
               </div>
@@ -437,7 +439,7 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
               ) : (
                 <Eye className="h-3 w-3 mr-1" />
               )}
-              {showTokens ? '隐藏' : '显示'}密钥
+              {showTokens ? t("common.hide") : t("common.show")}{t("common.key")}
             </Button>
           </div>
           )}
@@ -448,14 +450,14 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
       <Dialog open={showCurrentConfig} onOpenChange={setShowCurrentConfig}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>当前 settings.json 配置</DialogTitle>
+            <DialogTitle>{t("common.currentSettings")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 overflow-x-hidden">{/* 确保水平方向不溢出 */}
             {currentConfig ? (
               <div className="space-y-3">
                 {currentConfig.anthropic_base_url && (
                   <div>
-                    <p className="font-medium text-sm">ANTHROPIC_BASE_URL</p>
+                    <p className="font-medium text-sm">{t("common.anthropicBaseUrl")}</p>
                     <p className="text-sm text-muted-foreground font-mono bg-muted p-2 rounded">
                       {currentConfig.anthropic_base_url}
                     </p>
@@ -463,7 +465,7 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
                 )}
                 {currentConfig.anthropic_auth_token && (
                   <div>
-                    <p className="font-medium text-sm">ANTHROPIC_AUTH_TOKEN</p>
+                    <p className="font-medium text-sm">{t("common.anthropicAuthToken")}</p>
                     <div className="text-sm text-muted-foreground font-mono bg-muted p-3 rounded break-all overflow-hidden w-full">
                       {showTokens ? currentConfig.anthropic_auth_token : maskToken(currentConfig.anthropic_auth_token)}
                     </div>
@@ -471,7 +473,7 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
                 )}
                 {currentConfig.anthropic_api_key && (
                   <div>
-                    <p className="font-medium text-sm">ANTHROPIC_API_KEY</p>
+                    <p className="font-medium text-sm">{t("common.anthropicApiKey")}</p>
                     <div className="text-sm text-muted-foreground font-mono bg-muted p-3 rounded break-all overflow-hidden w-full">
                       {showTokens ? currentConfig.anthropic_api_key : maskToken(currentConfig.anthropic_api_key)}
                     </div>
@@ -479,7 +481,7 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
                 )}
                 {currentConfig.anthropic_model && (
                   <div>
-                    <p className="font-medium text-sm">ANTHROPIC_MODEL</p>
+                    <p className="font-medium text-sm">{t("common.anthropicModel")}</p>
                     <p className="text-sm text-muted-foreground font-mono bg-muted p-2 rounded">
                       {currentConfig.anthropic_model}
                     </p>
@@ -487,7 +489,7 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
                 )}
                 {currentConfig.anthropic_small_fast_model && (
                   <div>
-                    <p className="font-medium text-sm">ANTHROPIC_SMALL_FAST_MODEL</p>
+                    <p className="font-medium text-sm">{t("common.anthropicSmallFastModel")}</p>
                     <p className="text-sm text-muted-foreground font-mono bg-muted p-2 rounded">
                       {currentConfig.anthropic_small_fast_model}
                     </p>
@@ -507,7 +509,7 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
                     ) : (
                       <Eye className="h-3 w-3 mr-1" />
                     )}
-                    {showTokens ? '隐藏' : '显示'}密钥
+                    {showTokens ? t("common.hide") : t("common.show")}{t("common.key")}
                   </Button>
                 </div>
               </div>
@@ -515,7 +517,7 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
               <div className="flex items-center justify-center py-8">
                 <div className="text-center">
                   <AlertCircle className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground">未检测到任何 ANTHROPIC 配置</p>
+                    <p className="text-sm text-muted-foreground">{t("common.noAnthropicConfig")}</p>
                 </div>
               </div>
             )}
@@ -527,7 +529,7 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
       <Dialog open={showForm} onOpenChange={handleFormCancel}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editingProvider ? '编辑代理商' : '添加代理商'}</DialogTitle>
+            <DialogTitle>{editingProvider ? t("common.editProviderDialog") : t("common.addProviderDialog")}</DialogTitle>
           </DialogHeader>
           <ProviderForm
             initialData={editingProvider || undefined}
@@ -545,11 +547,11 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
       }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>确认删除</DialogTitle>
+            <DialogTitle>{t("dialogs.confirmDelete")}</DialogTitle>
           </DialogHeader>
           <div className="py-4">
-            <p>确定要删除代理商 "{providerToDelete?.name}" 吗？</p>
-            <p className="text-sm text-muted-foreground mt-2">此操作无法撤销。</p>
+            <p>{t("common.confirmDeleteProvider", { name: providerToDelete?.name })}</p>
+            <p className="text-sm text-muted-foreground mt-2">{t("common.thisOperationCannotBeUndone")}</p>
           </div>
           <div className="flex justify-end gap-2">
             <Button
@@ -558,7 +560,7 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
               disabled={deleting === providerToDelete?.id}
               className="hover:!text-gray-600 dark:hover:!text-gray-300"
             >
-              取消
+              {t("buttons.cancel")}
             </Button>
             <Button
               variant="destructive"
@@ -569,10 +571,10 @@ export default function ProviderManager({ onBack }: ProviderManagerProps) {
               {deleting === providerToDelete?.id ? (
                 <div className="flex items-center">
                   <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                  删除中...
+                  {t("common.deleting")}
                 </div>
               ) : (
-                '确认删除'
+                t("dialogs.confirmDelete")
               )}
             </Button>
           </div>
